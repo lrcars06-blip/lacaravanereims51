@@ -1,50 +1,61 @@
-// Compte rendu des réservations, envoyé à La Caravane le jour de chaque soirée (tâche planifiée Vercel, vercel.json).
-// Protégé par CRON_SECRET. Test manuel : GET /api/compte-rendu?date=AAAA-MM-JJ avec « Authorization: Bearer <CRON_SECRET> ».
+// Compte rendu des réservations, envoyé à La Caravane la VEILLE de chaque soirée (tâche planifiée Vercel, vercel.json).
+// Liste imprimable façon feuille de pointage : n°, nom, e-mail, téléphone, personnes, observation, case « Vu ».
+// Protégé par CRON_SECRET. Test manuel : GET /api/compte-rendu?date=AAAA-MM-JJ (date de la soirée).
 const L = require('./_lib');
 
-const td = 'padding:7px 8px;border-bottom:1px solid #eadfca;vertical-align:top;font-size:14px;color:#1D1338';
-const th = 'padding:7px 8px;text-align:left;font-size:12px;color:#5B4F78;text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid #d8cdb6';
-function tableau(titre, cols, rows) {
-  if (!rows.length) return `<h2 style="font-family:Georgia,serif;font-size:19px;color:#1D1338;margin:22px 0 6px">${L.esc(titre)}</h2><p style="margin:0;color:#5B4F78;font-size:14px">Aucune.</p>`;
-  return `<h2 style="font-family:Georgia,serif;font-size:19px;color:#1D1338;margin:22px 0 6px">${L.esc(titre)}</h2>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin:0 0 6px">
-<tr>${cols.map((c) => `<th style="${th}">${L.esc(c)}</th>`).join('')}</tr>
-${rows.map((r) => `<tr>${r.map((v) => `<td style="${td}">${L.esc(v || '')}</td>`).join('')}</tr>`).join('')}</table>`;
+const th = 'padding:8px 6px;text-align:left;font-size:11px;color:#FAEBD3;background:#1D1338;text-transform:uppercase;letter-spacing:.05em';
+const td = 'padding:8px 6px;border-bottom:1px solid #eadfca;vertical-align:top;font-size:14px;color:#1D1338';
+const vu = '<span style="display:inline-block;width:14px;height:14px;border:1.5px solid #5B4F78;border-radius:3px"></span>';
+
+function liste(titre, resas, repas) {
+  const total = resas.reduce((t, r) => t + r.pers, 0);
+  const head = `<h2 style="font-family:Georgia,serif;font-size:20px;color:#1D1338;margin:24px 0 8px">${L.esc(titre)} <span style="color:#B58A2E;font-size:16px">${resas.length} réservation${resas.length > 1 ? 's' : ''} · ${total} personne${total > 1 ? 's' : ''}</span></h2>`;
+  if (!resas.length) return head + '<p style="margin:0;color:#5B4F78;font-size:14px">Aucune réservation sur le site.</p>';
+  const rows = resas.map((r, i) => `<tr style="background:${i % 2 ? '#FFF7E8' : '#F6EEDC'}">
+<td style="${td};color:#5B4F78">${i + 1}</td>
+<td style="${td}"><b>${L.esc(r.nom)}</b>${r.email ? `<br><a href="mailto:${L.esc(r.email)}" style="color:#5B4F78;font-size:12px">${L.esc(r.email)}</a>` : ''}</td>
+<td style="${td};text-align:center;font-weight:700">${r.pers}</td>
+<td style="${td};white-space:nowrap">${r.tel ? `<a href="tel:${L.esc(r.tel.replace(/[^\d+]/g, ''))}" style="color:#1D1338">${L.esc(r.tel)}</a>` : ''}</td>
+<td style="${td};font-size:13px">${L.esc(r.obs)}</td>
+<td style="${td};text-align:center">${vu}</td></tr>`).join('');
+  return head + `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse">
+<tr><th style="${th}">N°</th><th style="${th}">Nom / e-mail</th><th style="${th};text-align:center">Pers.</th><th style="${th}">Téléphone</th><th style="${th}">Observation</th><th style="${th};text-align:center">Vu</th></tr>
+${rows}
+<tr><td colspan="6" style="padding:10px 6px;background:#1D1338;color:#FAEBD3;font-weight:700;font-size:14px;text-align:right">TOTAL : ${resas.length} réservation${resas.length > 1 ? 's' : ''} · ${total} personne${total > 1 ? 's' : ''}</td></tr></table>`;
 }
 
 async function compteRendu(ev) {
   const lignes = [['Date', `${L.dateFr(ev.date)}${ev.heure ? ', ' + ev.heure : ''}`]];
-  let bloc = '', subject;
+  let bloc = '', subject, nbPers = 0;
+  const ordre = (a, b) => a.t - b.t; // ordre d'arrivée des réservations
 
   if (ev.type === 'repas') {
-    const pis = (await L.acomptesSoiree(ev.id)).sort((a, b) => (a.metadata.nom || '').localeCompare(b.metadata.nom || '', 'fr'));
-    let places = 0, acomptes = 0, soldes = 0;
-    const rows = pis.map((pi) => {
-      const m = pi.metadata || {}, n = parseInt(m.places, 10) || 0, paye = pi.amount_received / 100, solde = Math.max(0, ev.prix * n - paye);
-      places += n; acomptes += paye; soldes += solde;
-      return [m.nom, String(n), m.telephone, L.euro(paye), L.euro(solde), [m.plateaux, m.precisions].filter(Boolean).join(' · ')];
-    });
-    const horsLigne = ev.reservees || 0;
-    lignes.push(['Places payées en ligne', `${places}`], horsLigne ? ['Places réservées hors site', `${horsLigne}`] : null,
-      horsLigne ? ['Total attendu', `${places + horsLigne} / ${ev.places}`] : null, ['Acomptes encaissés', L.euro(acomptes)], ['Soldes à encaisser ce soir', L.euro(soldes)]);
-    bloc = tableau('Réservations payées', ['Nom', 'Places', 'Téléphone', 'Acompte', 'Solde', 'Plateaux / précisions'], rows);
-    subject = `Compte rendu ${ev.titre} : ${places} couvert${places > 1 ? 's' : ''} réservé${places > 1 ? 's' : ''} en ligne`;
+    let acomptes = 0, soldes = 0;
+    const resas = (await L.acomptesSoiree(ev.id)).map((pi) => {
+      const m = pi.metadata || {}, pers = parseInt(m.places, 10) || 0, paye = pi.amount_received / 100, solde = Math.max(0, ev.prix * pers - paye);
+      acomptes += paye; soldes += solde;
+      return { t: pi.created || 0, nom: m.nom, email: m.email, tel: m.telephone, pers,
+        obs: [`Acompte ${L.euro(paye)}, solde ${L.euro(solde)}`, m.occasion, m.plateaux, m.precisions].filter(Boolean).join(' · ') };
+    }).sort(ordre);
+    nbPers = resas.reduce((t, r) => t + r.pers, 0);
+    lignes.push(['Couverts réservés en ligne', `${nbPers} / ${ev.places}`], ['Acomptes encaissés', L.euro(acomptes)], ['Soldes à encaisser', L.euro(soldes)]);
+    bloc = liste('Réservations payées en ligne', resas, true);
   } else {
-    const resas = await L.resasSoiree(ev.id);
-    const pass = resas.filter((c) => c.metadata.formule === 'pass'), attente = resas.filter((c) => c.metadata.formule === 'attente');
-    const nb = (l) => l.reduce((t, c) => t + (parseInt(c.metadata.places, 10) || 0), 0);
-    const ligne = (c) => [c.name, c.metadata.places, c.metadata.telephone || c.phone, [c.metadata.plateaux, c.metadata.precisions].filter(Boolean).join(' · ')];
-    lignes.push(['Pass réservés', `${nb(pass)} (${pass.length} réservation${pass.length > 1 ? 's' : ''})`], ['À encaisser sur place', L.euro(nb(pass) * ev.prix)]);
-    bloc = tableau('Pass réservés', ['Nom', 'Pass', 'Téléphone', 'Plateaux / précisions'], pass.map(ligne));
-    subject = `Compte rendu ${ev.titre} : ${nb(pass)} pass réservés`;
-    if (attente.length) { lignes.push(['Liste d\'attente', `${nb(attente)} personnes`]); bloc += tableau('Liste d\'attente', ['Nom', 'Personnes', 'Téléphone', 'Précisions'], attente.map(ligne)); }
+    const all = (await L.resasSoiree(ev.id)).map((c) => ({ t: c.created || 0, f: c.metadata.formule, nom: c.name, email: c.email, tel: c.metadata.telephone || c.phone,
+      pers: parseInt(c.metadata.places, 10) || 0, obs: [c.metadata.occasion, c.metadata.plateaux, c.metadata.precisions].filter(Boolean).join(' · ') })).sort(ordre);
+    const pass = all.filter((r) => r.f === 'pass'), attente = all.filter((r) => r.f === 'attente');
+    nbPers = pass.reduce((t, r) => t + r.pers, 0);
+    lignes.push(['Pass réservés en ligne', String(nbPers)], ['À encaisser sur place', L.euro(nbPers * ev.prix)]);
+    bloc = liste('Réservations', pass, false);
+    if (attente.length) bloc += liste('Liste d\'attente', attente, false);
   }
+  subject = `Demain : ${ev.titre}, ${nbPers} personne${nbPers > 1 ? 's' : ''} réservée${nbPers > 1 ? 's' : ''} sur le site`;
 
   return L.sendMail({
     to: L.env('RESERVATION_EMAIL'),
     subject,
-    html: L.mailHtml({ titre: ev.titre, intro: 'Voici les réservations enregistrées sur le site pour la soirée de ce soir.', lignes, bloc,
-      fin: 'Les réservations prises par téléphone ou par SMS ne figurent pas dans ce compte rendu.' }),
+    html: L.mailHtml({ titre: `Liste des réservations : ${ev.titre}`, intro: 'Voici toutes les réservations faites sur le site pour la soirée de demain. Imprimez ce mail pour le pointage à l\'arrivée.', lignes, bloc,
+      fin: 'Les réservations prises par téléphone ou par SMS ne figurent pas dans cette liste : ajoutez-les à la main.' }),
   });
 }
 
@@ -54,7 +65,8 @@ module.exports = async (req, res) => {
   if (!L.env('RESERVATION_EMAIL')) return L.json(res, 500, { ok: false, error: 'configuration' });
 
   const q = new URL(req.url, 'http://x').searchParams.get('date');
-  const jour = /^\d{4}-\d{2}-\d{2}$/.test(q || '') ? q : new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
+  const demain = new Date(Date.now() + 24 * 3600 * 1000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
+  const jour = /^\d{4}-\d{2}-\d{2}$/.test(q || '') ? q : demain;
   const soirees = L.SOIREES.filter((s) => s.date === jour);
   const envoyes = [];
   try {
