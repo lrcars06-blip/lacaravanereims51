@@ -12,6 +12,9 @@
 - api/rappels.js : e-mail de rappel la veille de la soirée (tous les jours à 10h, via vercel.json)
 - api/_soirees.js : prix et capacité des soirées côté paiement (généré depuis index.html)
 
+## Déployer une modification
+`./deploy.sh "message"` : vérifie les images et les fonctions, commit, push sur `main`, puis attend que lacaravanereims.com serve la nouvelle version (Vercel déploie automatiquement chaque push sur `main`).
+
 ## Mise en ligne (Vercel)
 1. Pousser ce dossier sur GitHub, puis Vercel > Add New Project > importer le dépôt (Framework : Other, pas de build).
 2. Settings > Environment Variables : renseigner les variables de .env.example, puis Redeploy.

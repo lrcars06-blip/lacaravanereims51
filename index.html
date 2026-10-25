@@ -10,7 +10,11 @@
 <meta property="og:locale" content="fr_FR">
 <meta property="og:title" content="La Caravane, salle de fête à privatiser près de Reims">
 <meta property="og:description" content="Anniversaire, repas d'entreprise, EVJF, mariage : privatisez La Caravane ou réservez votre espace. Jusqu'à 200 personnes, parking gratuit.">
-<meta property="og:image" content="salle-caravane.jpg">
+<meta property="og:image" content="https://lacaravanereims.com/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://lacaravanereims.com/">
+<link rel="canonical" href="https://lacaravanereims.com/">
 <link rel="icon" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,7 +38,8 @@ document.addEventListener('error', function (e) {
   "@context": "https://schema.org",
   "@type": "EventVenue",
   "name": "La Caravane",
-  "url": "https://lacaravane-reims.fr/",
+  "url": "https://lacaravanereims.com/",
+  "image": "https://lacaravanereims.com/og-image.jpg",
   "telephone": "+33326075910",
   "maximumAttendeeCapacity": 200,
   "address": {
@@ -286,6 +291,8 @@ dialog.box::backdrop{background:rgba(6,4,16,.94)}
 .cal-days span{text-align:center;font-size:.8rem;color:var(--cream-dim);padding-bottom:6px}
 .cal-grid button,.cal-grid span{aspect-ratio:1;border-radius:10px;display:grid;place-items:center;font-weight:600;font-size:.95rem;border:0;background:none;color:var(--cream-dim);position:relative}
 .cal-grid span.past{opacity:.35}
+.cal-grid span.prive{color:rgba(250,235,211,.4);background:repeating-linear-gradient(135deg,rgba(250,235,211,.08) 0 4px,transparent 4px 8px);text-decoration:line-through}
+.cal-legend i.prive-dot{border-radius:3px;background:repeating-linear-gradient(135deg,rgba(250,235,211,.45) 0 2px,transparent 2px 4px)}
 .cal-grid .today{box-shadow:inset 0 0 0 1.5px var(--line)}
 .cal-grid button{background:color-mix(in srgb,var(--c) 22%,transparent);color:var(--cream);cursor:pointer;transition:transform .15s ease,background-color .15s ease}
 .cal-grid button::after{content:"";position:absolute;bottom:6px;width:6px;height:6px;border-radius:50%;background:var(--c);box-shadow:0 0 calc(8px*var(--glow)) var(--c)}
@@ -323,10 +330,16 @@ dialog.box::backdrop{background:rgba(6,4,16,.94)}
 /* Plateaux */
 .pl-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 .pl-card{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:20px;padding:20px;border-radius:var(--r-m);background:var(--night-2);border:1px solid var(--line)}
+.pl-card.pl-noimg{grid-template-columns:1fr}
 .pl-card h3{font-size:clamp(1.4rem,2.2vw,1.8rem)}
 .pl-card ul{display:grid;gap:4px;margin:12px 0 16px;color:var(--cream-dim);font-size:.95rem}
 .pl-card ul li::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--bulb);margin:0 10px 2px 0}
 .pl-price{font-family:var(--display);font-size:1.5rem;color:var(--bulb)}
+.pl-card ul.pl-tarifs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:4px 0 0;font-size:1rem}
+.pl-card ul.pl-tarifs li{display:grid;gap:2px;padding:10px 8px;border-radius:12px;background:rgba(255,200,61,.08);border:1px solid rgba(255,200,61,.25);text-align:center}
+.pl-card ul.pl-tarifs li::before{display:none}
+.pl-tarifs span{font-size:.85rem;color:var(--cream-dim)}
+.pl-tarifs b{font-family:var(--display);font-weight:400;font-size:1.45rem;color:var(--bulb)}
 .pl-note{font-size:.9rem;color:var(--cream-dim);margin-top:6px}
 /* Formulaire : plateaux, notes */
 .plateaux-pick{display:grid;gap:10px}
@@ -648,7 +661,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
         </ul>
       </div>
       <div class="formule-side">
-        <figure class="shot" data-photo><img loading="lazy" src="tables-guirlandes.jpg" alt="Les grandes tables de la salle sous les guirlandes et les lampions" width="1500" height="1001"></figure>
+        <figure class="shot" data-photo><img loading="lazy" src="tables-nappes.jpg" alt="Les tables à nappes vichy alignées le long de la caravane illuminée" width="1600" height="901"></figure>
         <div class="usage">
           <div class="switch" role="group" aria-label="Type d'événement">
             <button type="button" aria-pressed="true" data-usage="fete">Pour la fête</button>
@@ -657,7 +670,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
           <p data-usage-text="fete">Anniversaire, mariage, EVJF, pot de départ : vous décorez vos tables, vous amenez votre playlist ou notre DJ, et l'équipe reste à portée de main si vous avez besoin d'elle.</p>
           <p data-usage-text="travail" hidden>En semaine, La Caravane accueille aussi vos réunions et journées d'équipe : accueil petit-déjeuner, déjeuner sur place, matériel à disposition. Les formules s'adaptent à votre programme, demandez-les dans votre devis.</p>
         </div>
-        <figure class="shot" data-photo><img loading="lazy" src="bar-champagne.jpg" alt="Le bar de La Caravane et son comptoir « Life is Champagne »" width="1500" height="1001"></figure>
+        <figure class="shot" data-photo><img loading="lazy" src="bar-life-is-champagne.jpg" alt="Le comptoir « Life is Champagne », la caravane et les lustres au-dessus du bar" width="1600" height="1200"></figure>
       </div>
     </div>
 
@@ -672,7 +685,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
           <li><span><strong>Droit de bouchon uniquement sur le champagne :</strong> 7 € TTC par bouteille de champagne ouverte. Vous pouvez apporter votre champagne, et lui seulement.</span></li>
           <li><span><strong>Salle partagée ou non</strong> avec d'autres groupes, selon la soirée.</span></li>
         </ul>
-        <figure class="shot" data-photo style="margin-top:28px"><img loading="lazy" src="buffet.jpg" alt="Buffet de petites navettes garnies et de brochettes" width="1500" height="1125"></figure>
+        <figure class="shot" data-photo style="margin-top:28px"><img loading="lazy" src="salle-scene-bar.jpg" alt="La salle vue du bar : tables, fresques, boule à facettes et scène au fond" width="1600" height="1200"></figure>
       </div>
       <div class="board">
         <h3>La carte des formules conviviales</h3>
@@ -700,7 +713,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
       <p>La visite virtuelle vous montre le bar, la cantine, la caravane et les tables comme si vous y étiez.</p>
     </div>
     <div class="tour" id="tour" data-photo>
-      <img loading="lazy" src="salle-lumieres.jpg" alt="Vue d'ensemble de la salle éclairée en rose et violet" width="1600" height="1200">
+      <img loading="lazy" src="salle-vue-ensemble.jpg" alt="Vue d'ensemble de la salle : lustres, boule à facettes, guirlandes et scène" width="1600" height="1200">
       <div class="tour-veil" id="tourVeil">
         <button class="tour-go" id="tourGo" type="button" aria-label="Lancer la visite virtuelle à 360 degrés">360°</button>
         <p>Lancer la visite virtuelle. Faites glisser l'image pour regarder autour de vous.</p>
@@ -752,6 +765,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
           <li><i style="--c:var(--bulb)"></i>Pass soirée, réglé sur place</li>
           <li><i style="--c:var(--coral)"></i>Soirée repas, acompte 30 %</li>
           <li><i style="--c:rgba(250,235,211,.35)"></i>Complet</li>
+          <li><i class="prive-dot"></i>Samedi privatisé, jusqu'au 30 novembre</li>
         </ul>
       </div>
       <div class="events" id="events"></div>
@@ -999,7 +1013,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
 <p>Les privatisations et les formules Convivialité (à partir de 30 personnes) font l'objet d'un devis personnalisé. La réservation est ferme à la signature du devis et au versement de l'acompte qui y est prévu. Les conditions particulières du devis (droit de bouchon, DJ, horaires, prestations) complètent les présentes conditions et priment en cas de contradiction.</p>
 
 <h2 id="cgv-plateaux">9. Plateaux à partager</h2>
-<p>Les plateaux d'amuse-bouches et de mignardises se commandent au moins 48 heures avant la date souhaitée. La composition peut varier selon les produits disponibles. Les prix sont communiqués sur demande ou sur le devis. Merci de signaler toute allergie lors de la commande.</p>
+<p>Les plateaux d'amuse-bouches et de mignardises se commandent au moins 48 heures avant la date souhaitée. La composition peut varier selon les produits disponibles. Prix TTC : amuse-bouches salés 28 € les 20 pièces, 56 € les 40 pièces, 84 € les 60 pièces ; mignardises sucrées 24 € les 20 pièces, 48 € les 40 pièces, 72 € les 60 pièces. Au-delà, tarif sur demande. Les plateaux se règlent au retrait ou lors de la soirée. Merci de signaler toute allergie lors de la commande.</p>
 
 <h2 id="cgv-accueil">10. Règles d'accueil</h2>
 <ul>
@@ -1099,14 +1113,17 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
       prix: 95, prixTexte: 'par adulte, hors boissons. Menu enfant : 30 €', places: 160, reservees: 160, complet: true,
       affiche: 'affiche-reveillon.jpg', infos: ['Menu de fête', 'Menu enfant 30 €', 'Jusqu\'à 5h du matin'] }
   ];
-  /* PLATEAUX À PARTAGER. prix en euros par plateau, ou null pour « prix sur demande ». */
+  /* PLATEAUX À PARTAGER. prix TTC d'un plateau de « pieces » pièces ; on commande par multiples (20, 40, 60…). */
   var PLATEAUX = [
-    { id: 'amuse', nom: 'Plateau amuse-bouches salés', prix: null, affiche: 'plateau-amuse-bouches.jpg',
+    { id: 'amuse', nom: 'Plateau amuse-bouches salés', prix: 28, pieces: 20, affiche: '',
       items: ['Toast beurre truffé et jambon cru', 'Toast crevettes et chorizo', 'Brochettes de charcuterie', 'Wrap de légumes', 'Wrap saumon avocat', 'Mini burger poulet, sauce oignons-poivrons', 'Toast jambon de Reims, concassé de tomate', 'Mini burger rôti de bœuf', 'Navettes au saumon'] },
-    { id: 'sucre', nom: 'Plateau mignardises sucrées', prix: null, affiche: 'plateau-mignardises.jpg',
-      items: ['Mini cheesecake au biscuit rose', 'Mini brownie caramel', 'Financier framboise', 'Tartelette praliné', 'Tartelette citron', 'Choux chocolat', 'Mini tarte tatin', 'Mini pastel de nata'] }
+    { id: 'sucre', nom: 'Plateau mignardises sucrées', prix: 24, pieces: 20, affiche: '',
+      items: ['Mini cheesecake au biscuit rose de Reims', 'Mini brownie caramel', 'Financier framboise', 'Tartelette praliné', 'Tartelette citron', 'Choux chocolat', 'Mini tarte tatin', 'Mini pastel de nata'] }
   ];
   var PLATEAU_DELAI_H = 48;
+  var PLATEAU_SMS = '06 11 68 26 98';
+  /* SAMEDIS PRIVATISÉS : plus de demande de réservation possible le samedi jusqu'à cette date incluse. */
+  var SAMEDIS_PRIVES_JUSQU = '2026-11-30';
   var PHOTOS = '';
   /* TOUR_URL : adresse d'une visite 360° intégrable en iframe (Kuula, Matterport, ou une page /visite du site).
      L'ancienne visite virtuelle n'existe plus (erreur 404)
@@ -1139,17 +1156,16 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
   var MIN_CONVIV = 30, MAX = 200;
   var SOIREE_MAX = 160; /* plafond de places par soirée, quelle que soit la valeur de « places » */
   var GALLERY = [
-    ['salle-caravane.jpg', 'La caravane et la fresque aux palmiers'],
-    ['tables-guirlandes.jpg', 'Les grandes tables sous les guirlandes'],
-    ['bar-champagne.jpg', 'Le bar « Life is Champagne »'],
-    ['salle-lumieres.jpg', 'La salle en lumières de fête'],
-    ['cantine.jpg', 'La Cantine et son comptoir'],
-    ['concert.jpg', 'Concert rock devant la caravane'],
-    ['buffet.jpg', 'Navettes garnies pour l\'apéro dînatoire'],
-    ['bar-jour.jpg', 'Le bar en plein jour'],
-    ['guitares.jpg', 'Guitares sur scène'],
-    ['salle-prete.jpg', 'La salle prête à recevoir'],
-    ['soiree-concert.jpg', 'Soirée concert à La Caravane']
+    ['salle-vue-ensemble.jpg', 'La salle en lumières de fête'],
+    ['bar-life-is-champagne.jpg', 'Le bar « Life is Champagne »'],
+    ['caravane-murale.jpg', 'La caravane, star de la salle'],
+    ['tables-nappes.jpg', 'Les tables le long de la caravane'],
+    ['salle-scene-bar.jpg', 'La salle vue du bar, la scène au fond'],
+    ['bar-caravane.jpg', 'Le bar sous la caravane'],
+    ['caravane-lustres.jpg', 'Lustres et boule à facettes'],
+    ['table-dressee.jpg', 'Une table prête pour la soirée'],
+    ['pression.jpg', 'Les bières pression du bar'],
+    ['facade.jpg', 'La façade, rue des Docks Rémois']
   ];
 
   /* ---------- État partagé ---------- */
@@ -1478,6 +1494,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
   var calMonth = UPCOMING.length ? new Date(UPCOMING[0].date + 'T12:00:00') : new Date(calMin); calMonth.setDate(1);
   var calMax = UPCOMING.length ? new Date(UPCOMING[UPCOMING.length - 1].date + 'T12:00:00') : new Date(calMin); calMax.setDate(1);
   if (calMax < calMin) calMax = new Date(calMin);
+  function samediPrive(v) { return !!v && new Date(v + 'T12:00:00').getDay() === 6 && v <= SAMEDIS_PRIVES_JUSQU; }
   function ymd(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
   function renderCal() {
     var y = calMonth.getFullYear(), m = calMonth.getMonth();
@@ -1486,9 +1503,9 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
     for (var k = 0; k < first; k++) html += '<span aria-hidden="true"></span>';
     for (var dd = 1; dd <= days; dd++) {
       var date = new Date(y, m, dd), key = ymd(date), ev = UPCOMING.filter(function (x) { return x.date === key; })[0];
-      var cls = (date < todayD ? 'past' : '') + (+date === +todayD ? ' today' : '');
+      var cls = (date < todayD ? 'past' : '') + (+date === +todayD ? ' today' : '') + (!ev && date >= todayD && samediPrive(key) ? ' prive' : '');
       html += ev ? '<button type="button" class="' + cls + '" style="--c:' + evColor(ev) + '" data-cal="' + ev.id + '" aria-pressed="' + (ev.id === activeId) + '" aria-label="' + dd + ' ' + MOIS_LONG[m] + ' : ' + esc(ev.titre) + (evFull(ev) ? ', complet' : '') + '">' + dd + '</button>'
-                 : '<span class="' + cls + '">' + dd + '</span>';
+                 : '<span class="' + cls + '"' + (/prive/.test(cls) ? ' title="Privatisé"' : '') + '>' + dd + '</span>';
     }
     $('#calGrid').innerHTML = html;
     $('#calPrev').disabled = calMonth <= calMin; $('#calNext').disabled = calMonth >= calMax;
@@ -1527,7 +1544,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
   }
   function goSlide(i) { i = (i + UPCOMING.length) % UPCOMING.length; track.scrollTo({ left: i * track.clientWidth, behavior: calm ? 'auto' : 'smooth' }); showInfo(i); }
   if (!UPCOMING.length) {
-    $('.show-wrap').innerHTML = '<figure class="hero-photo"><img src="salle-caravane.jpg" alt="La salle de La Caravane : une caravane illuminée et des tables dressées"></figure>';
+    $('.show-wrap').innerHTML = '<figure class="hero-photo"><img src="caravane-lustres.jpg" alt="La salle de La Caravane : la caravane illuminée, les lustres et les tables dressées"></figure>';
   } else {
     track.innerHTML = UPCOMING.map(function (e, i) {
       var tag = evFull(e) ? 'Complet' : e.type === 'pass' ? 'Pass ' + euro(e.prix) : 'Soirée repas';
@@ -1551,11 +1568,12 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
 
   /* ---------- Plateaux ---------- */
   var plq = {};
-  function pxTxt(v) { return v == null ? 'Prix sur demande' : euro(v) + ' le plateau'; }
+  function pxTxt(p) { return p.prix == null ? 'Prix sur demande' : [1, 2, 3].map(function (k) { return k * p.pieces + ' pièces : ' + euro(k * p.prix); }).join(' · '); }
+  function pxCourt(p) { return p.prix == null ? 'Prix sur demande' : euro(p.prix) + ' les ' + p.pieces + ' pièces'; }
   $('#plGrid').innerHTML = PLATEAUX.map(function (p) {
-    return '<article class="pl-card"><button class="ev-poster" type="button" data-plposter="' + p.id + '" aria-label="Voir l\'affiche : ' + esc(p.nom) + '"><img loading="lazy" src="' + p.affiche + '" alt=""></button>' +
+    return '<article class="pl-card' + (p.affiche ? '' : ' pl-noimg') + '">' + (p.affiche ? '<button class="ev-poster" type="button" data-plposter="' + p.id + '" aria-label="Voir l\'affiche : ' + esc(p.nom) + '"><img loading="lazy" src="' + p.affiche + '" alt=""></button>' : '') +
       '<div><h3>' + esc(p.nom) + '</h3><ul>' + p.items.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>' +
-      '<p class="pl-price">' + pxTxt(p.prix) + '</p><p class="pl-note">Commande ' + PLATEAU_DELAI_H + ' h à l\'avance.</p>' +
+      (p.prix == null ? '<p class="pl-price">Prix sur demande</p>' : '<ul class="pl-tarifs">' + [1, 2, 3].map(function (k) { return '<li><span>' + k * p.pieces + ' pièces</span><b>' + euro(k * p.prix) + '</b></li>'; }).join('') + '</ul>') + '<p class="pl-note">Prix TTC. Au-delà de ' + 3 * p.pieces + ' pièces : tarif sur demande. Commande ' + PLATEAU_DELAI_H + ' h à l\'avance, à emporter ou à déguster sur place lors des soirées.</p>' +
       '<a class="btn btn-ghost" href="#reserver" style="margin-top:14px">Ajouter à ma réservation</a></div></article>';
   }).join('');
   $('#plGrid').addEventListener('click', function (e) { var b = e.target.closest('[data-plposter]'); if (!b) return; var p = PLATEAUX.filter(function (x) { return x.id === b.dataset.plposter; })[0]; openPoster(p.affiche, p.nom); });
@@ -1614,24 +1632,27 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
   /* Plateaux dans le formulaire */
   $('#plateauxPick').innerHTML = PLATEAUX.map(function (p) {
     plq[p.id] = 0;
-    return '<div class="pick"><span><b>' + esc(p.nom) + '</b><small>' + pxTxt(p.prix) + '</small></span>' +
-      '<div class="stepper" role="group" aria-label="' + esc(p.nom) + '"><button type="button" data-pl="' + p.id + '" data-d="-1" aria-label="Un plateau de moins">−</button><output id="pl-' + p.id + '">0</output><button type="button" data-pl="' + p.id + '" data-d="1" aria-label="Un plateau de plus">+</button></div></div>';
+    return '<div class="pick"><span><b>' + esc(p.nom) + '</b><small id="plx-' + p.id + '">' + pxCourt(p) + '</small></span>' +
+      '<div class="stepper" role="group" aria-label="' + esc(p.nom) + '"><button type="button" data-pl="' + p.id + '" data-d="-1" aria-label="20 pièces de moins">−</button><output id="pl-' + p.id + '">0</output><button type="button" data-pl="' + p.id + '" data-d="1" aria-label="20 pièces de plus">+</button></div></div>';
   }).join('');
   $('#plateauxPick').addEventListener('click', function (e) {
     var b = e.target.closest('button[data-pl]'); if (!b) return;
-    plq[b.dataset.pl] = Math.max(0, Math.min(50, plq[b.dataset.pl] + +b.dataset.d));
-    $('#pl-' + b.dataset.pl).textContent = plq[b.dataset.pl]; checkPlateaux();
+    var id = b.dataset.pl, p = PLATEAUX.filter(function (x) { return x.id === id; })[0];
+    plq[id] = Math.max(0, Math.min(20, plq[id] + +b.dataset.d));
+    $('#pl-' + id).textContent = plq[id];
+    $('#plx-' + id).textContent = plq[id] ? plq[id] * p.pieces + ' pièces' + (p.prix != null ? ' · ' + euro(plq[id] * p.prix) + (plq[id] > 3 ? ', tarif confirmé sur devis' : '') : '') : pxCourt(p);
+    checkPlateaux();
   });
   function plateauxTotal() { return PLATEAUX.reduce(function (n, p) { return n + plq[p.id]; }, 0); }
   function plateauxTxt() {
-    return PLATEAUX.filter(function (p) { return plq[p.id] > 0; }).map(function (p) { return plq[p.id] + ' × ' + p.nom.toLowerCase() + (p.prix != null ? ' (' + euro(p.prix * plq[p.id]) + ')' : ''); }).join(', ');
+    return PLATEAUX.filter(function (p) { return plq[p.id] > 0; }).map(function (p) { return p.nom.replace('Plateau ', '') + ' : ' + plq[p.id] * p.pieces + ' pièces' + (p.prix != null ? ' (' + euro(p.prix * plq[p.id]) + ' TTC)' : ''); }).join(', ');
   }
   function plateauxTooLate() {
     var v = $('#date').value; if (!v || !plateauxTotal()) return false;
     return new Date(v + 'T19:00:00') - new Date() < PLATEAU_DELAI_H * 3600 * 1000;
   }
-  function checkPlateaux() { $('#plWarn').textContent = plateauxTooLate() ? 'Les plateaux se commandent ' + PLATEAU_DELAI_H + ' h à l\'avance : pour cette date, appelez-nous au 03 26 07 59 10.' : ''; }
-  $('#date').addEventListener('change', checkPlateaux);
+  function checkPlateaux() { $('#plWarn').textContent = plateauxTooLate() ? 'Les plateaux se commandent ' + PLATEAU_DELAI_H + ' h à l\'avance : pour cette date, envoyez-nous un SMS au ' + PLATEAU_SMS + '.' : ''; }
+  $('#date').addEventListener('change', function () { checkPlateaux(); var m = RULES.date($('#date').value); if (m && samediPrive($('#date').value)) fail('date', m); });
   form.addEventListener('change', function (e) {
     if (e.target.name === 'fformule' || e.target.id === 'fEvent' || e.target.id === 'fGuests') {
       if (e.target.name === 'fformule' && (e.target.value === 'exclu' || e.target.value === 'conviv')) { state.formule = e.target.value; render(); return; }
@@ -1651,7 +1672,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
     org: function (v) { return $('#org').required && !v ? 'Indiquez le nom de votre entreprise ou organisation.' : ''; },
     email: function (v) { return !v ? 'Indiquez votre e-mail pour recevoir le devis.' : /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v) ? '' : 'Cet e-mail semble incomplet. Exemple : prenom@exemple.fr'; },
     tel: function (v) { return !v ? 'Indiquez un numéro où vous joindre.' : v.replace(/\D/g, '').length >= 9 ? '' : 'Ce numéro semble trop court. Exemple : 06 12 34 56 78'; },
-    date: function (v) { return !v ? 'Choisissez la date de votre soirée.' : v < $('#date').min ? 'Choisissez une date à venir.' : ''; },
+    date: function (v) { return !v ? 'Choisissez la date de votre soirée.' : v < $('#date').min ? 'Choisissez une date à venir.' : samediPrive(v) && !$('#date').readOnly ? 'La salle est déjà privatisée tous les samedis jusqu\'au 30 novembre. Choisissez un autre jour.' : ''; },
     fGuests: function (v) { var n = +v, min = +$('#fGuests').min, max = +$('#fGuests').max; return !n ? 'Indiquez le nombre de personnes.' : n < min ? 'Cette formule est réservable à partir de ' + min + ' personnes.' : n > max ? 'Maximum ' + max + ' pour cette réservation.' : ''; },
     msg: function () { return ''; }
   };
