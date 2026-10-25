@@ -10,10 +10,12 @@
 - api/places.js : places déjà payées, pour la jauge des soirées
 - api/session.js : récapitulatif affiché sur merci.html
 - api/rappels.js : e-mail de rappel la veille de la soirée (tous les jours à 10h, via vercel.json)
+- api/compte-rendu.js : le jour de chaque soirée vers 15h-16h, compte rendu des réservations (acomptes payés, pass, liste d'attente) envoyé à RESERVATION_EMAIL
+- api/version.js : commit en ligne, utilisé par deploy.sh
 - api/_soirees.js : prix et capacité des soirées côté paiement (généré depuis index.html)
 
 ## Déployer une modification
-`./deploy.sh "message"` : vérifie les images et les fonctions, commit, push sur `main`, puis attend que lacaravanereims.com serve la nouvelle version (Vercel déploie automatiquement chaque push sur `main`).
+`./deploy.sh "message"` : vérifie les images et les fonctions, commit, push sur `main`, puis attend que lacaravanereims.com serve ce commit (route `/api/version`) (Vercel déploie automatiquement chaque push sur `main`).
 
 ## Mise en ligne (Vercel)
 1. Pousser ce dossier sur GitHub, puis Vercel > Add New Project > importer le dépôt (Framework : Other, pas de build).

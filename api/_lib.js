@@ -77,7 +77,7 @@ async function sendMail({ to, subject, html, text, replyTo }) {
   return { ok: r.ok };
 }
 /* Gabarit d'e-mail aux couleurs du site */
-function mailHtml({ titre, intro, lignes = [], fin = '' }) {
+function mailHtml({ titre, intro, lignes = [], fin = '', bloc = '' }) {
   const rows = lignes.filter(Boolean).map(([k, v]) => `<tr><td style="padding:8px 0;color:#5B4F78;width:40%">${esc(k)}</td><td style="padding:8px 0;font-weight:600;color:#1D1338">${esc(v)}</td></tr>`).join('');
   return `<!doctype html><html lang="fr"><body style="margin:0;background:#17123A;font-family:Helvetica,Arial,sans-serif">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#17123A;padding:28px 12px"><tr><td align="center">
@@ -87,6 +87,7 @@ function mailHtml({ titre, intro, lignes = [], fin = '' }) {
 <h1 style="margin:0 0 12px;font-family:Georgia,serif;font-size:26px;color:#1D1338">${esc(titre)}</h1>
 <p style="margin:0 0 18px;color:#1D1338;font-size:16px;line-height:1.55">${intro}</p>
 ${rows ? `<table role="presentation" width="100%" style="border-top:1px dashed #d8cdb6;border-bottom:1px dashed #d8cdb6;margin:0 0 18px;font-size:15px">${rows}</table>` : ''}
+${bloc}
 ${fin ? `<p style="margin:0 0 6px;color:#1D1338;font-size:15px;line-height:1.55">${fin}</p>` : ''}
 <p style="margin:18px 0 0;color:#5B4F78;font-size:14px">17 rue des Docks Rémois, 51450 Bétheny<br>03 26 07 59 10</p>
 </td></tr></table></td></tr></table></body></html>`;
@@ -94,4 +95,31 @@ ${fin ? `<p style="margin:0 0 6px;color:#1D1338;font-size:15px;line-height:1.55"
 
 function json(res, code, obj) { res.statusCode = code; res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.end(JSON.stringify(obj)); }
 
-module.exports = { env, clean, isEmail, euro, dateFr, esc, soiree, siteUrl, readJson, readRaw, stripe, placesVendues, verifStripe, sendMail, mailHtml, json, SOIREES, DEPOSIT };
+/* Réservations sans paiement (pass soirée, liste d'attente) : enregistrées comme clients Stripe
+   avec la métadonnée kind = « resa », pour le compte rendu de soirée. */
+async function enregistrerResa(meta, { nom, email, telephone }) {
+  if (!env('STRIPE_SECRET_KEY')) return;
+  const md = {};
+  for (const [k, v] of Object.entries(meta)) if (v !== undefined && v !== null && v !== '') md[k] = String(v).slice(0, 490);
+  await stripe('POST', '/customers', { name: nom, email, phone: telephone, description: `Réservation ${meta.formule} ${meta.event_id}`, metadata: { kind: 'resa', ...md } });
+}
+async function resasSoiree(eventId) {
+  const out = []; let page;
+  do {
+    const r = await stripe('GET', '/customers/search', { query: `metadata['kind']:'resa' AND metadata['event_id']:'${eventId}'`, limit: 100, page });
+    out.push(...r.data);
+    page = r.has_more ? r.next_page : undefined;
+  } while (page);
+  return out;
+}
+async function acomptesSoiree(eventId) {
+  const out = []; let page;
+  do {
+    const r = await stripe('GET', '/payment_intents/search', { query: `metadata['event_id']:'${eventId}' AND status:'succeeded'`, limit: 100, page });
+    out.push(...r.data);
+    page = r.has_more ? r.next_page : undefined;
+  } while (page);
+  return out;
+}
+
+module.exports = { enregistrerResa, resasSoiree, acomptesSoiree, env, clean, isEmail, euro, dateFr, esc, soiree, siteUrl, readJson, readRaw, stripe, placesVendues, verifStripe, sendMail, mailHtml, json, SOIREES, DEPOSIT };

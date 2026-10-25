@@ -22,12 +22,12 @@ git push -q origin main
 SHA=$(git rev-parse --short HEAD)
 echo "Poussé ($SHA). Vercel déploie…"
 
-# 3. Attendre que le site en ligne serve la nouvelle version de index.html
-LOCAL=$(sha1sum index.html | cut -c1-40)
+# 3. Attendre que Vercel serve ce commit (route /api/version)
+FULL=$(git rev-parse HEAD)
 for i in $(seq 1 30); do
   sleep 10
-  LIVE=$(curl -s "$SITE/?v=$RANDOM" | sha1sum | cut -c1-40)
-  if [ "$LIVE" = "$LOCAL" ]; then echo "En ligne : $SITE"; exit 0; fi
+  LIVE=$(curl -s "$SITE/api/version?v=$RANDOM" | sed -n 's/.*"commit":"\([0-9a-f]*\)".*/\1/p')
+  if [ "$LIVE" = "$FULL" ]; then echo "En ligne ($SHA) : $SITE"; exit 0; fi
 done
-echo "Le site ne sert pas encore la nouvelle version après 5 min : vérifier Vercel > Deployments."
+echo "Vercel ne sert pas encore $SHA après 5 min : vérifier Vercel > Deployments."
 exit 1
