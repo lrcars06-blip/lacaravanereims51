@@ -71,7 +71,7 @@ function enregistrer(d, refs) {
   if (!d.event) return false;
   if (d.ref && refs.has(d.ref)) return false;
   const statut = STATUTS.includes(d.statut) ? d.statut : 'confirmé';
-  feuille().appendRow([d.date ? new Date(d.date) : new Date(), d.event, d.nom || '', d.email || '', String(d.tel || ''),
+  feuille().appendRow([d.date ? new Date(d.date) : new Date(), d.event, d.nom || '', d.email || '', d.tel ? "'" + String(d.tel) : '',
     parseInt(d.personnes, 10) || 0, statut, d.paiement || '', d.ref || '']);
   if (d.ref) refs.add(d.ref);
   ajouterSoiree(d.event, d.capacite, d.titre);
