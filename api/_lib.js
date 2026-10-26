@@ -101,13 +101,15 @@ function json(res, code, obj) { res.statusCode = code; res.setHeader('Content-Ty
    Inactif tant que SHEET_SECRET n'est pas défini dans Vercel (le site retombe alors sur Stripe seul). */
 const SHEET_URL = () => env('SHEET_API_URL') || 'https://script.google.com/macros/s/AKfycbwcN1Cavshg_1aNnyMN6mfHwTdz0AfQC-LhZhYRaHskCsXweGHav7Fevff3aK57tOY3/exec';
 const sheetOn = () => !!env('SHEET_SECRET');
+/* Tolère un collage imparfait dans Vercel (espaces, guillemets, « SECRET = … ») : on garde l'identifiant. */
+const sheetSecret = () => { const v = env('SHEET_SECRET'); const m = v.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i); return m ? m[0].toLowerCase() : v.trim(); };
 async function sheetPost(payload) {
   if (!sheetOn()) return null;
   try {
     const r = await fetch(SHEET_URL(), {
       method: 'POST', redirect: 'follow', signal: AbortSignal.timeout(15000),
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ ...payload, secret: env('SHEET_SECRET') }),
+      body: JSON.stringify({ ...payload, secret: sheetSecret() }),
     });
     const j = await r.json();
     if (!j.ok) console.error('Sheet', j.error);
