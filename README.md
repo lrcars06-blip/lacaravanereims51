@@ -14,6 +14,20 @@
 - api/version.js : commit en ligne, utilisé par deploy.sh
 - api/_soirees.js : prix et capacité des soirées côté paiement (généré depuis index.html)
 
+## Suivi des réservations : Google Sheet « Réservations La Caravane »
+- Compte Google de La Caravane. Script : `sheet/apps-script.gs` (copie de référence de Extensions > Apps Script).
+- Chaque pass, liste d'attente et acompte payé y est inscrit automatiquement (réf Stripe en colonne I).
+- Onglet `Soirees` : capacité, réservées (statut « confirmé ») et restantes, par soirée (ajoutée automatiquement).
+- Annuler : passer le Statut à « annulé » (ne pas supprimer la ligne). La place se libère sur le site (jauge et paiement),
+  la réservation sort du compte rendu et du rappel. Un acompte annulé se rembourse à part dans Stripe.
+- Réservation prise par téléphone : ajouter une ligne à la main (Soirée = id de la soirée, Statut = confirmé), elle compte dans la jauge.
+- Rattrapage automatique chaque matin (tâche des rappels) : les réservations Stripe des soirées à venir absentes du Sheet y sont ajoutées.
+- Variable Vercel `SHEET_SECRET` = propriété SECRET du script (Apps Script > Paramètres du projet). Sans elle, le site fonctionne sur Stripe seul.
+
+## Factures d'acompte
+Stripe génère une facture (préfixe CARAV) pour chaque acompte payé et l'envoie au client avec son reçu
+(`invoice_creation` dans api/checkout.js ; e-mails « Paiements réussis » activés dans Stripe).
+
 ## Déployer une modification
 `./deploy.sh "message"` : vérifie les images et les fonctions, commit, push sur `main`, puis attend que lacaravanereims.com serve ce commit (route `/api/version`) (Vercel déploie automatiquement chaque push sur `main`).
 

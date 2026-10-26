@@ -9,11 +9,12 @@ module.exports = async (req, res) => {
   const demain = new Date(Date.now() + 24 * 3600 * 1000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' }); // AAAA-MM-JJ
   let envoyes = 0, page;
   try {
+    const annules = await L.sheetAnnules();
     do {
       const r = await L.stripe('GET', '/payment_intents/search', { query: `metadata['event_date']:'${demain}' AND status:'succeeded'`, limit: 100, page });
       for (const pi of r.data) {
         const m = pi.metadata || {};
-        if (m.rappel === 'envoye') continue;
+        if (m.rappel === 'envoye' || annules.has(pi.id)) continue;
         const ev = L.soiree(m.event_id) || { titre: m.event_id, date: demain, heure: '', prix: 0 };
         const places = parseInt(m.places, 10) || 0;
         const solde = Math.max(0, ev.prix * places - pi.amount_received / 100);
@@ -29,7 +30,9 @@ module.exports = async (req, res) => {
       }
       page = r.has_more ? r.next_page : undefined;
     } while (page);
-    return L.json(res, 200, { ok: true, date: demain, envoyes });
+    let sheet = null;
+    try { sheet = await L.syncSheet(); } catch (e) { console.error('sync Sheet', e.message); }
+    return L.json(res, 200, { ok: true, date: demain, envoyes, sheet });
   } catch (e) {
     console.error(e.message);
     return L.json(res, 502, { ok: false });

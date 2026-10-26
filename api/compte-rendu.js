@@ -25,13 +25,14 @@ ${rows}
 }
 
 async function compteRendu(ev) {
+  const annules = await L.sheetAnnules();
   const lignes = [['Date', `${L.dateFr(ev.date)}${ev.heure ? ', ' + ev.heure : ''}`]];
   let bloc = '', subject, nbPers = 0;
   const ordre = (a, b) => a.t - b.t; // ordre d'arrivée des réservations
 
   if (ev.type === 'repas') {
     let acomptes = 0, soldes = 0;
-    const resas = (await L.acomptesSoiree(ev.id)).map((pi) => {
+    const resas = (await L.acomptesSoiree(ev.id)).filter((pi) => !annules.has(pi.id)).map((pi) => {
       const m = pi.metadata || {}, pers = parseInt(m.places, 10) || 0, paye = pi.amount_received / 100, solde = Math.max(0, ev.prix * pers - paye);
       acomptes += paye; soldes += solde;
       return { t: pi.created || 0, nom: m.nom, email: m.email, tel: m.telephone, pers,
@@ -41,7 +42,7 @@ async function compteRendu(ev) {
     lignes.push(['Couverts réservés en ligne', `${nbPers} / ${ev.places}`], ['Acomptes encaissés', L.euro(acomptes)], ['Soldes à encaisser', L.euro(soldes)]);
     bloc = liste('Réservations payées en ligne', resas, true);
   } else {
-    const all = (await L.resasSoiree(ev.id)).map((c) => ({ t: c.created || 0, f: c.metadata.formule, nom: c.name, email: c.email, tel: c.metadata.telephone || c.phone,
+    const all = (await L.resasSoiree(ev.id)).filter((c) => !annules.has(c.id)).map((c) => ({ t: c.created || 0, f: c.metadata.formule, nom: c.name, email: c.email, tel: c.metadata.telephone || c.phone,
       pers: parseInt(c.metadata.places, 10) || 0, obs: [c.metadata.occasion, c.metadata.plateaux, c.metadata.precisions].filter(Boolean).join(' · ') })).sort(ordre);
     const pass = all.filter((r) => r.f === 'pass'), attente = all.filter((r) => r.f === 'attente');
     nbPers = pass.reduce((t, r) => t + r.pers, 0);

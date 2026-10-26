@@ -95,13 +95,74 @@ ${fin ? `<p style="margin:0 0 6px;color:#1D1338;font-size:15px;line-height:1.55"
 
 function json(res, code, obj) { res.statusCode = code; res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.end(JSON.stringify(obj)); }
 
+/* ---------- Google Sheet « Réservations La Caravane » (Apps Script, voir sheet/apps-script.gs) ----------
+   Le site y inscrit chaque réservation (pass, liste d'attente, acompte payé). Vincent annule une ligne en
+   passant son Statut à « annulé » : la place se libère sur le site et disparaît du compte rendu.
+   Inactif tant que SHEET_SECRET n'est pas défini dans Vercel (le site retombe alors sur Stripe seul). */
+const SHEET_URL = () => env('SHEET_API_URL') || 'https://script.google.com/macros/s/AKfycbwcN1Cavshg_1aNnyMN6mfHwTdz0AfQC-LhZhYRaHskCsXweGHav7Fevff3aK57tOY3/exec';
+const sheetOn = () => !!env('SHEET_SECRET');
+async function sheetPost(payload) {
+  if (!sheetOn()) return null;
+  try {
+    const r = await fetch(SHEET_URL(), {
+      method: 'POST', redirect: 'follow', signal: AbortSignal.timeout(15000),
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ ...payload, secret: env('SHEET_SECRET') }),
+    });
+    const j = await r.json();
+    if (!j.ok) console.error('Sheet', j.error);
+    return j;
+  } catch (e) { console.error('Sheet', e.message); return null; }
+}
+/* Personnes confirmées par soirée d'après le Sheet : { id: nombre }, ou null si le Sheet est inactif ou injoignable. */
+async function sheetCounts() {
+  if (!sheetOn()) return null;
+  try {
+    const r = await fetch(SHEET_URL() + '?all=1', { redirect: 'follow', signal: AbortSignal.timeout(8000) });
+    const j = await r.json();
+    return j && j.counts ? j.counts : null;
+  } catch (e) { console.error('Sheet', e.message); return null; }
+}
+/* Références Stripe des réservations annulées dans le Sheet. */
+async function sheetAnnules() {
+  const j = await sheetPost({ action: 'annules' });
+  return new Set((j && j.refs) || []);
+}
+/* Ligne de Sheet à partir d'un acompte Stripe (PaymentIntent) ou d'une réservation sans paiement (client Stripe). */
+function ligneAcompte(pi) {
+  const m = pi.metadata || {}, ev = soiree(m.event_id) || { titre: m.event_id, prix: 0, places: 160 };
+  const pers = parseInt(m.places, 10) || 0, paye = (pi.amount_received || pi.amount || 0) / 100;
+  return { event: m.event_id, titre: ev.titre, capacite: ev.places, nom: m.nom, email: m.email, tel: m.telephone, personnes: pers,
+    statut: 'confirmé', paiement: `Acompte ${euro(paye)} · solde ${euro(Math.max(0, ev.prix * pers - paye))}`, ref: pi.id,
+    date: pi.created ? new Date(pi.created * 1000).toISOString() : undefined };
+}
+function ligneResa(c) {
+  const m = c.metadata || {}, ev = soiree(m.event_id) || { titre: m.event_id, prix: 0, places: 160 };
+  const pers = parseInt(m.places, 10) || 0, attente = m.formule === 'attente';
+  return { event: m.event_id, titre: ev.titre, capacite: ev.places, nom: c.name, email: c.email, tel: m.telephone || c.phone, personnes: pers,
+    statut: attente ? 'attente' : 'confirmé', paiement: attente ? 'Liste d\'attente' : `Pass sur place (${euro(pers * ev.prix)})`, ref: c.id,
+    date: c.created ? new Date(c.created * 1000).toISOString() : undefined };
+}
+/* Rattrapage : renvoie au Sheet toutes les réservations Stripe des soirées à venir (sans doublon, le Sheet dédoublonne par réf). */
+async function syncSheet() {
+  if (!sheetOn() || !env('STRIPE_SECRET_KEY')) return { skipped: true };
+  const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
+  const lignes = [];
+  for (const s of SOIREES.filter((x) => x.date >= today)) {
+    if (s.type === 'repas') (await acomptesSoiree(s.id)).forEach((pi) => lignes.push(ligneAcompte(pi)));
+    else (await resasSoiree(s.id)).forEach((c) => lignes.push(ligneResa(c)));
+  }
+  if (!lignes.length) return { ok: true, ajoutees: 0 };
+  return sheetPost({ action: 'lot', lignes });
+}
+
 /* Réservations sans paiement (pass soirée, liste d'attente) : enregistrées comme clients Stripe
    avec la métadonnée kind = « resa », pour le compte rendu de soirée. */
 async function enregistrerResa(meta, { nom, email, telephone }) {
   if (!env('STRIPE_SECRET_KEY')) return;
   const md = {};
   for (const [k, v] of Object.entries(meta)) if (v !== undefined && v !== null && v !== '') md[k] = String(v).slice(0, 490);
-  await stripe('POST', '/customers', { name: nom, email, phone: telephone, description: `Réservation ${meta.formule} ${meta.event_id}`, metadata: { kind: 'resa', ...md } });
+  return stripe('POST', '/customers', { name: nom, email, phone: telephone, description: `Réservation ${meta.formule} ${meta.event_id}`, metadata: { kind: 'resa', ...md } });
 }
 async function resasSoiree(eventId) {
   const out = []; let page;
@@ -122,4 +183,4 @@ async function acomptesSoiree(eventId) {
   return out;
 }
 
-module.exports = { enregistrerResa, resasSoiree, acomptesSoiree, env, clean, isEmail, euro, dateFr, esc, soiree, siteUrl, readJson, readRaw, stripe, placesVendues, verifStripe, sendMail, mailHtml, json, SOIREES, DEPOSIT };
+module.exports = { sheetPost, sheetCounts, sheetAnnules, ligneAcompte, ligneResa, syncSheet, enregistrerResa, resasSoiree, acomptesSoiree, env, clean, isEmail, euro, dateFr, esc, soiree, siteUrl, readJson, readRaw, stripe, placesVendues, verifStripe, sendMail, mailHtml, json, SOIREES, DEPOSIT };

@@ -37,11 +37,12 @@ module.exports = async (req, res) => {
   }
   if (b.plateaux) lignes.push(['Plateaux', L.clean(b.plateaux, 400)]);
   if (ev && (attente || f === 'pass')) {
-    try {
-      await L.enregistrerResa({ event_id: ev.id, event_date: ev.date, formule: attente ? 'attente' : 'pass', places: n,
-        telephone: tel, occasion: L.clean(b.occasion, 80), plateaux: L.clean(b.plateaux, 400), precisions: L.clean(b.precisions, 450) },
-        { nom, email, telephone: tel });
-    } catch (e) { console.error('enregistrement resa', e.message); }
+    const meta = { event_id: ev.id, event_date: ev.date, formule: attente ? 'attente' : 'pass', places: n,
+      telephone: tel, occasion: L.clean(b.occasion, 80), plateaux: L.clean(b.plateaux, 400), precisions: L.clean(b.precisions, 450) };
+    let client = null;
+    try { client = await L.enregistrerResa(meta, { nom, email, telephone: tel }); } catch (e) { console.error('enregistrement resa', e.message); }
+    // Suivi dans le Google Sheet (réf = client Stripe, pour dédoublonner et pour les annulations)
+    await L.sheetPost(L.ligneResa({ name: nom, email, phone: tel, ...(client || {}), metadata: { ...meta, ...((client && client.metadata) || {}) } }));
   }
   await L.sendMail({ to: email, subject: titre + ' : La Caravane', replyTo: L.env('RESERVATION_EMAIL'), html: L.mailHtml({ titre, intro, lignes, fin }) });
 

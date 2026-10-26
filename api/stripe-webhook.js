@@ -39,5 +39,10 @@ module.exports = async (req, res) => {
       html: L.mailHtml({ titre: 'Nouvelle réservation payée', intro: 'Un acompte vient d\'être payé en ligne.', lignes: [...lignes, ['Nom', m.nom], ['E-mail', m.email], ['Téléphone', m.telephone], ['Occasion', m.occasion], m.precisions ? ['Précisions', m.precisions] : null] }),
     }),
   ]);
+
+  // Suivi dans le Google Sheet (réf = PaymentIntent, pour dédoublonner et pour les annulations)
+  if (s.payment_intent) {
+    await L.sheetPost(L.ligneAcompte({ id: s.payment_intent, metadata: m, amount_received: s.amount_total, created: event.created }));
+  }
   return L.json(res, 200, { ok: true });
 };

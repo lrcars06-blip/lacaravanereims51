@@ -16,7 +16,8 @@ module.exports = async (req, res) => {
 
   try {
     if (ev.complet) return L.json(res, 409, { ok: false, error: 'complet', restant: 0 });
-    const vendues = await L.placesVendues(ev.id);
+    const counts = await L.sheetCounts();
+    const vendues = counts ? (counts[ev.id] || 0) : await L.placesVendues(ev.id);
     const restant = Math.max(0, ev.places - ev.reservees - vendues);
     if (places > restant) return L.json(res, 409, { ok: false, error: 'complet', restant });
 
@@ -34,6 +35,12 @@ module.exports = async (req, res) => {
       line_items: { 0: { quantity: places, price_data: { currency: 'eur', unit_amount: unit, product_data: { name: `Acompte 30 % : ${ev.titre}`, description: `${L.dateFr(ev.date)}, ${ev.heure}. Solde réglé sur place.` } } } },
       metadata: meta,
       payment_intent_data: { metadata: meta, description: `Acompte ${ev.titre} (${ev.date}) x${places}` },
+      // Facture d'acompte générée par Stripe et envoyée au client avec son reçu
+      invoice_creation: { enabled: true, invoice_data: {
+        description: `Facture d'acompte (30 %) : ${ev.titre}, ${L.dateFr(ev.date)}, ${places} place${places > 1 ? 's' : ''}`,
+        footer: `Acompte de 30 % sur un total de ${L.euro(ev.prix * places)} TTC. Solde de ${L.euro(ev.prix * places - unit * places / 100)} à régler sur place le soir de la soirée.`,
+        metadata: { event_id: ev.id, places: String(places) },
+      } },
       success_url: `${site}/merci.html?type=soiree&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${site}/#agenda`,
     });
