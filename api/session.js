@@ -13,7 +13,7 @@ module.exports = async (req, res) => {
     return L.json(res, 200, {
       ok: true, paye: s.payment_status === 'paid',
       prenom: (m.nom || '').split(' ')[0], soiree: ev.titre || '', date: ev.date || m.event_date, heure: ev.heure || '',
-      places, acompte: paye, solde: Math.max(0, (ev.prix || 0) * places - paye), plateaux: m.plateaux || '',
+      places, acompte: paye, solde: Math.max(0, L.totalResa(ev, m) - paye), plateaux: m.plateaux || '',
     });
   } catch (e) {
     console.error(e.message);

@@ -17,7 +17,7 @@ module.exports = async (req, res) => {
         if (m.rappel === 'envoye' || annules.has(pi.id)) continue;
         const ev = L.soiree(m.event_id) || { titre: m.event_id, date: demain, heure: '', prix: 0 };
         const places = parseInt(m.places, 10) || 0;
-        const solde = Math.max(0, ev.prix * places - pi.amount_received / 100);
+        const solde = Math.max(0, L.totalResa(ev, m) - pi.amount_received / 100);
         const ok = await L.sendMail({
           to: m.email,
           subject: `C'est demain : ${ev.titre}`,

@@ -9,6 +9,11 @@ const euro = (n) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency
 const dateFr = (d) => new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Paris' });
 const esc = (t) => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const soiree = (id) => SOIREES.find((s) => s.id === id);
+const ACOMPTES = require('./_acomptes');
+/* Lien privé d'acompte valide pour cette soirée ? (clients ayant réservé par téléphone) */
+const lienAcompte = (id, cle) => { const a = ACOMPTES[id]; return a && cle && String(cle) === a.cle ? a : null; };
+/* Prix total TTC d'une réservation : métadonnée « total » si présente (adultes + enfants), sinon prix adulte × places. */
+const totalResa = (ev, m) => (m && m.total ? Number(m.total) : (ev.prix || 0) * (parseInt(m && m.places, 10) || 0));
 const siteUrl = (req) => (env('SITE_URL') || `https://${req.headers['x-forwarded-host'] || req.headers.host}`).replace(/\/$/, '');
 
 async function readJson(req) {
@@ -135,7 +140,7 @@ function ligneAcompte(pi) {
   const m = pi.metadata || {}, ev = soiree(m.event_id) || { titre: m.event_id, prix: 0, places: 160 };
   const pers = parseInt(m.places, 10) || 0, paye = (pi.amount_received || pi.amount || 0) / 100;
   return { event: m.event_id, titre: ev.titre, capacite: ev.places, nom: m.nom, email: m.email, tel: m.telephone, personnes: pers,
-    statut: 'confirmé', paiement: `Acompte ${euro(paye)} · solde ${euro(Math.max(0, ev.prix * pers - paye))}`, ref: pi.id,
+    statut: 'confirmé', paiement: `Acompte ${euro(paye)} · solde ${euro(Math.max(0, totalResa(ev, m) - paye))}${m.enfants ? ` (dont ${m.enfants} enfant${m.enfants > 1 ? 's' : ''})` : ''}`, ref: pi.id,
     date: pi.created ? new Date(pi.created * 1000).toISOString() : undefined };
 }
 function ligneResa(c) {
@@ -185,4 +190,4 @@ async function acomptesSoiree(eventId) {
   return out;
 }
 
-module.exports = { sheetPost, sheetCounts, sheetAnnules, ligneAcompte, ligneResa, syncSheet, enregistrerResa, resasSoiree, acomptesSoiree, env, clean, isEmail, euro, dateFr, esc, soiree, siteUrl, readJson, readRaw, stripe, placesVendues, verifStripe, sendMail, mailHtml, json, SOIREES, DEPOSIT };
+module.exports = { lienAcompte, totalResa, sheetPost, sheetCounts, sheetAnnules, ligneAcompte, ligneResa, syncSheet, enregistrerResa, resasSoiree, acomptesSoiree, env, clean, isEmail, euro, dateFr, esc, soiree, siteUrl, readJson, readRaw, stripe, placesVendues, verifStripe, sendMail, mailHtml, json, SOIREES, DEPOSIT };

@@ -18,9 +18,9 @@ module.exports = async (req, res) => {
   const ev = L.soiree(m.event_id) || { titre: m.event_id, date: m.event_date, heure: '', prix: 0 };
   const places = parseInt(m.places, 10) || 0;
   const paye = (s.amount_total || 0) / 100;
-  const solde = Math.max(0, ev.prix * places - paye);
+  const solde = Math.max(0, L.totalResa(ev, m) - paye);
   const lignes = [
-    ['Soirée', ev.titre], ['Date', `${L.dateFr(ev.date)}${ev.heure ? ', ' + ev.heure : ''}`], ['Places', String(places)],
+    ['Soirée', ev.titre], ['Date', `${L.dateFr(ev.date)}${ev.heure ? ', ' + ev.heure : ''}`], ['Places', m.enfants ? `${places} (dont ${m.enfants} enfant${m.enfants > 1 ? 's' : ''})` : String(places)],
     ['Acompte payé', L.euro(paye)], ['Solde à régler sur place', L.euro(solde)],
     m.plateaux ? ['Plateaux', m.plateaux] : null,
   ];

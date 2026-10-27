@@ -24,6 +24,12 @@
 - Rattrapage automatique chaque matin (tâche des rappels) : les réservations Stripe des soirées à venir absentes du Sheet y sont ajoutées.
 - Variable Vercel `SHEET_SECRET` = propriété SECRET du script (Apps Script > Paramètres du projet). Sans elle, le site fonctionne sur Stripe seul.
 
+## Acompte des clients ayant réservé par téléphone (soirées complètes)
+Lien privé par soirée, à envoyer par La Caravane à ses clients : `acompte.html?s=<id soirée>&k=<clé>` (clés dans `api/_acomptes.js`).
+Le client saisit nom, e-mail, téléphone, adultes et enfants, puis paie 30 % (pas de contrôle de places : elles sont déjà comptées).
+Même circuit que le site : facture d'acompte, e-mails, ligne dans le Sheet, rappel la veille, compte rendu.
+Pour désactiver un lien : supprimer sa ligne dans `api/_acomptes.js`. Pour une nouvelle soirée : ajouter une ligne avec une nouvelle clé.
+
 ## Factures d'acompte
 Stripe génère une facture (préfixe CARAV) pour chaque acompte payé et l'envoie au client avec son reçu
 (`invoice_creation` dans api/checkout.js ; e-mails « Paiements réussis » activés dans Stripe).
