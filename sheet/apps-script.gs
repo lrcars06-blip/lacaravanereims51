@@ -80,6 +80,22 @@ function enregistrer(d, refs) {
   return true;
 }
 
+// Recopie dans l'onglet Soirees toutes les soirées de l'agenda du site (lacaravanereims.com/api/soirees).
+// Tourne seul chaque matin (déclencheur créé au premier lancement) : une soirée ajoutée sur le site apparaît ici le lendemain au plus tard.
+const SITE = 'https://lacaravanereims.com';
+function majSoirees() {
+  const r = UrlFetchApp.fetch(SITE + '/api/soirees?v=' + Date.now(), { muteHttpExceptions: true });
+  if (r.getResponseCode() !== 200) { Logger.log('Site injoignable : ' + r.getResponseCode()); return 0; }
+  const avant = SpreadsheetApp.getActive().getSheetByName('Soirees').getRange(2, 1, 199, 1).getValues().flat().filter(String).length;
+  JSON.parse(r.getContentText()).soirees.forEach((x) => ajouterSoiree(x.id, x.places, x.titre));
+  const apres = SpreadsheetApp.getActive().getSheetByName('Soirees').getRange(2, 1, 199, 1).getValues().flat().filter(String).length;
+  if (!ScriptApp.getProjectTriggers().some((t) => t.getHandlerFunction() === 'majSoirees')) {
+    ScriptApp.newTrigger('majSoirees').timeBased().everyDays(1).atHour(6).create();
+  }
+  Logger.log((apres - avant) + ' soirée(s) ajoutée(s)');
+  return apres - avant;
+}
+
 // Ajoute la soirée dans l'onglet Soirees si elle n'y est pas encore.
 function ajouterSoiree(id, capacite, titre) {
   const s = SpreadsheetApp.getActive().getSheetByName('Soirees');
@@ -141,10 +157,8 @@ function miseEnForme() {
   const ss = SpreadsheetApp.getActive(), r = feuille(), s = ss.getSheetByName('Soirees');
   const NOIR = '#1D1338', CREME = '#FFF7E8', OR = '#FFC83D';
 
-  // 1. Soirées de l'agenda présentes dans l'onglet Soirees (les nouvelles s'ajoutent toutes seules)
-  [['halloween-party-2026-10-30', 160, 'Halloween Party'], ['halloween-repas-2026-10-31', 160, 'Halloween, soirée repas'],
-   ['celibataires-2026-11-06', 160, 'Soirée célibataires'], ['reveillon-2026-12-31', 160, 'Réveillon du jour de l\'an']]
-    .forEach((x) => ajouterSoiree(x[0], x[1], x[2]));
+  // 1. Soirées de l'agenda présentes dans l'onglet Soirees (lues sur le site, voir majSoirees)
+  majSoirees();
   s.getRange('F1:G1').setValues([['soirée (date · titre)', 'date']]);
   const fF = [], fG = [];
   for (let i = 2; i <= 200; i++) {
