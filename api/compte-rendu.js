@@ -30,7 +30,7 @@ async function compteRendu(ev) {
   let bloc = '', subject, nbPers = 0;
   const ordre = (a, b) => a.t - b.t; // ordre d'arrivée des réservations
 
-  if (ev.type === 'repas') {
+  if (ev.type === 'repas' && !ev.surPlace) {
     let acomptes = 0, soldes = 0;
     const resas = (await L.acomptesSoiree(ev.id)).filter((pi) => !annules.has(pi.id)).map((pi) => {
       const m = pi.metadata || {}, pers = parseInt(m.places, 10) || 0, paye = pi.amount_received / 100, solde = Math.max(0, L.totalResa(ev, m) - paye);
@@ -44,9 +44,10 @@ async function compteRendu(ev) {
   } else {
     const all = (await L.resasSoiree(ev.id)).filter((c) => !annules.has(c.id)).map((c) => ({ t: c.created || 0, f: c.metadata.formule, nom: c.name, email: c.email, tel: c.metadata.telephone || c.phone,
       pers: parseInt(c.metadata.places, 10) || 0, obs: [c.metadata.occasion, c.metadata.plateaux, c.metadata.precisions].filter(Boolean).join(' · ') })).sort(ordre);
-    const pass = all.filter((r) => r.f === 'pass'), attente = all.filter((r) => r.f === 'attente');
+    const pass = all.filter((r) => r.f === 'pass' || r.f === 'surplace'), attente = all.filter((r) => r.f === 'attente');
     nbPers = pass.reduce((t, r) => t + r.pers, 0);
-    lignes.push(['Pass réservés en ligne', String(nbPers)], ['À encaisser sur place', L.euro(nbPers * ev.prix)]);
+    lignes.push([ev.surPlace ? 'Places réservées en ligne' : 'Pass réservés en ligne', String(nbPers)], ['À encaisser sur place', L.euro(nbPers * ev.prix)]);
+    if (ev.reservees && !ev.complet) lignes.push(['Réservations prises hors site (téléphone, réseaux)', `${ev.reservees} personnes, à pointer sur votre liste`]);
     bloc = liste('Réservations', pass, false);
     if (attente.length) bloc += liste('Liste d\'attente', attente, false);
   }
@@ -59,8 +60,11 @@ async function compteRendu(ev) {
     lignes.push(['Ajoutées dans le Sheet (téléphone)', `${aLaMain.length} réservation${aLaMain.length > 1 ? 's' : ''}, ${n} personne${n > 1 ? 's' : ''}`]);
     bloc += liste('Réservations ajoutées dans le Sheet', aLaMain, false);
   }
-  lignes.push(['TOTAL attendu', `${nbPers} personne${nbPers > 1 ? 's' : ''}`]);
-  subject = `Demain : ${ev.titre}, ${nbPers} personne${nbPers > 1 ? 's' : ''} réservée${nbPers > 1 ? 's' : ''}`;
+  // Réservations prises hors site (téléphone, réseaux), saisies dans la configuration de la soirée.
+  // Soirée complète : le chiffre de la salle inclut déjà tout le monde, on affiche la capacité.
+  if (ev.complet) lignes.push(['TOTAL attendu', `Complet : ${ev.places} personnes`]);
+  else { nbPers += ev.reservees || 0; lignes.push(['TOTAL attendu', `${nbPers} personne${nbPers > 1 ? 's' : ''}`]); }
+  subject = ev.complet ? `Demain : ${ev.titre}, complet (${ev.places} personnes)` : `Demain : ${ev.titre}, ${nbPers} personne${nbPers > 1 ? 's' : ''} réservée${nbPers > 1 ? 's' : ''}`;
 
   return L.sendMail({
     to: L.env('RESERVATION_EMAIL'),

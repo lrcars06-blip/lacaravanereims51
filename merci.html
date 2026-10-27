@@ -89,6 +89,13 @@ footer a{color:var(--cream)}
     $('#body').innerHTML = rows([['Soirée', q.get('soiree')], ['Date', dateFr(q.get('date'))], ['Pass', n + (prix ? ' × ' + euro(prix) : '')], prix ? ['À régler sur place', euro(n * prix), true] : null]) +
       '<p class="note">' + (q.get('gratuit') ? 'Entrée gratuite : votre table est notée, les consommations se règlent sur place.' : 'Le pass comprend l\'entrée et une consommation. Il se règle sur place, le soir même.') + '</p>';
     addCal(q.get('soiree') || 'Soirée', q.get('date'));
+  } else if (type === 'place') {
+    $('#t').textContent = 'Votre place est réservée';
+    $('#lead').innerHTML = 'Merci' + prenom + ', c\'est noté : on vous attend ! Un e-mail de confirmation vous a été envoyé.';
+    var np = +q.get('n') || 1, pp = +q.get('prix') || 0;
+    $('#body').innerHTML = rows([['Soirée', q.get('soiree')], ['Date', dateFr(q.get('date'))], ['Places', np + (pp ? ' × ' + euro(pp) : '')], pp ? ['À régler sur place', euro(np * pp), true] : null]) +
+      '<p class="note">Aucun paiement en ligne : tout se règle sur place, le soir même.</p>';
+    addCal(q.get('soiree') || 'Soirée', q.get('date'));
   } else if (type === 'attente') {
     $('#t').textContent = 'Vous êtes sur la liste d\'attente';
     $('#lead').innerHTML = 'Merci' + prenom + '. La soirée est complète pour le moment : nous vous recontactons dès qu\'une place se libère.';

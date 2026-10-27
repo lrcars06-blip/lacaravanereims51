@@ -87,7 +87,11 @@ function majSoirees() {
   const r = UrlFetchApp.fetch(SITE + '/api/soirees?v=' + Date.now(), { muteHttpExceptions: true });
   if (r.getResponseCode() !== 200) { Logger.log('Site injoignable : ' + r.getResponseCode()); return 0; }
   const avant = SpreadsheetApp.getActive().getSheetByName('Soirees').getRange(2, 1, 199, 1).getValues().flat().filter(String).length;
-  JSON.parse(r.getContentText()).soirees.forEach((x) => ajouterSoiree(x.id, x.places, x.titre));
+  const liste = JSON.parse(r.getContentText()).soirees, s = SpreadsheetApp.getActive().getSheetByName('Soirees');
+  liste.forEach((x) => ajouterSoiree(x.id, x.places, x.titre));
+  // Places disponibles en ligne mises à jour pour les soirées déjà présentes (réservations prises hors site déduites sur le site).
+  const ids = s.getRange(2, 1, 199, 1).getValues().flat();
+  liste.forEach((x) => { const i = ids.indexOf(x.id); if (i >= 0 && Number(s.getRange(i + 2, 2).getValue()) !== x.places) s.getRange(i + 2, 2).setValue(x.places); });
   const apres = SpreadsheetApp.getActive().getSheetByName('Soirees').getRange(2, 1, 199, 1).getValues().flat().filter(String).length;
   if (!ScriptApp.getProjectTriggers().some((t) => t.getHandlerFunction() === 'majSoirees')) {
     ScriptApp.newTrigger('majSoirees').timeBased().everyDays(1).atHour(6).create();

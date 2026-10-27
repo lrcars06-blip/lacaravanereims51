@@ -22,7 +22,7 @@ module.exports = async (req, res) => {
   const enfants = lien ? Math.max(0, parseInt(b.enfants, 10) || 0) : 0;
   const places = adultes + enfants;
   const email = L.clean(b.email, 200), nom = L.clean(b.nom, 120), tel = L.clean(b.telephone, 40);
-  if (!ev || ev.type !== 'repas') return L.json(res, 400, { ok: false, error: 'soiree' });
+  if (!ev || ev.type !== 'repas' || (ev.surPlace && !lien)) return L.json(res, 400, { ok: false, error: 'soiree' });
   if (!(adultes >= (lien && enfants ? 0 : 1) && adultes <= 20 && enfants <= 20 && places >= 1)) return L.json(res, 400, { ok: false, error: 'places' });
   if (!nom || !L.isEmail(email) || tel.replace(/\D/g, '').length < 9) return L.json(res, 400, { ok: false, error: 'coordonnees' });
   if (new Date(ev.date + 'T23:59:59') < new Date()) return L.json(res, 400, { ok: false, error: 'passee' });

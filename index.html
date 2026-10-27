@@ -760,7 +760,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
   <div class="wrap">
     <div class="band-head">
       <h2>Les soirées à venir</h2>
-      <p>Soirées dansantes avec pass, soirées repas, soirées à thème. Le pass soirée se règle sur place ; une soirée repas se confirme avec un acompte de 30 % réglé en ligne. 160 places assises par soirée : complet, c'est complet.</p>
+      <p>Soirées dansantes avec pass, soirées repas, soirées à thème. Le pass soirée se règle sur place ; une soirée repas se confirme avec un acompte de 30 % réglé en ligne, ou se règle sur place selon la soirée. 160 places assises par soirée : complet, c'est complet.</p>
     </div>
     <div class="agenda-grid">
       <div class="cal" id="cal">
@@ -773,7 +773,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
         <div class="cal-grid" id="calGrid"></div>
         <ul class="cal-legend">
           <li><i style="--c:var(--bulb)"></i>Pass soirée, réglé sur place</li>
-          <li><i style="--c:var(--coral)"></i>Soirée repas, acompte 30 %</li>
+          <li><i style="--c:var(--coral)"></i>Soirée repas, acompte 30 % ou réglée sur place</li>
           <li><i style="--c:rgba(250,235,211,.35)"></i>Complet</li>
           <li><i class="prive-dot"></i>Samedi privatisé, jusqu'au 30 novembre</li>
           <li><i class="ferme-dot"></i>Lundi au jeudi : fermé au public, privatisation uniquement</li>
@@ -1109,7 +1109,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
   var DEPOSIT = 0.30;
   /* SOIRÉES. Une ligne par soirée, dans n'importe quel ordre (le site trie par date et masque les dates passées).
      type    : 'pass'  = soirée dansante, pass réglé sur place (pas d'acompte)
-               'repas' = soirée repas, acompte de 30 % en ligne
+               'repas' = soirée repas, acompte de 30 % en ligne (surPlace: true = sans acompte, tout se règle sur place)
      prix    : prix du pass (type pass) ou du repas adulte (type repas), en euros
      places  : capacité (plafonnée à 160 places assises par SOIREE_MAX)
      reservees : places déjà réservées, à mettre à jour à la main
@@ -1124,7 +1124,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
       affiche: 'affiche-caravane-en-fete.jpg', infos: ['DJ Baloo', 'Soirée dansante', '1 conso incluse', 'Tenue correcte demandée'] },
     { id: 'halloween-party-2026-10-30', type: 'pass', titre: 'Halloween Party', date: '2026-10-30', heure: 'de 19h30 à 2h',
       texte: 'Venez simplement faire la fête ! Ambiance Halloween et soirée dansante avec DJ Baloo. Une soirée accessible, festive et terrifiante.',
-      prix: 10, prixTexte: 'le pass, 1 consommation offerte', places: 160, reservees: 0, complet: false,
+      prix: 10, prixTexte: 'le pass, 1 consommation offerte', places: 160, reservees: 143, complet: false,
       affiche: 'affiche-halloween-party.jpg', infos: ['DJ Baloo', 'Soirée dansante', 'Dress code : déguisé', '1 conso offerte'] },
     { id: 'halloween-repas-2026-10-31', type: 'repas', titre: 'Halloween, soirée repas et dansante', date: '2026-10-31', heure: 'en soirée',
       texte: 'Cocktail avec ou sans alcool, 3 amuse-bouches par personne, buffet froid et buffet de desserts. Soirée dansante avec DJ Chris.',
@@ -1136,11 +1136,11 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
       affiche: 'affiche-celibataires.jpg', infos: ['DJ Luis', 'Bracelets de couleur', 'Planches 18 € (2 pers.)', 'Ouverte à tous'] },
     { id: 'back-to-the-80-2026-11-10', type: 'pass', titre: 'Back to the 80, Act III', date: '2026-11-10', heure: 'de 19h30 à 2h',
       texte: 'Spéciale années 80, veille de jour férié : une nuit 100 % années 80 avec DJ Chriss Anderssen. Encore quelques places disponibles.',
-      prix: 10, prixTexte: 'le pass, 1 consommation offerte', places: 160, reservees: 0, complet: false,
+      prix: 10, prixTexte: 'le pass, 1 consommation offerte', places: 160, reservees: 137, complet: false,
       affiche: 'affiche-back-to-the-80.jpg', infos: ['DJ Chriss Anderssen', '100 % années 80', 'Veille de jour férié', '1 conso offerte'] },
     { id: 'nouba-2026-11-13', type: 'pass', titre: 'La Caravane fait la Nouba', date: '2026-11-13', heure: 'de 19h30 à 2h',
       texte: 'Une soirée festive et conviviale animée par DJ Baloo : tubes dance, hits actuels et piste de danse agrandie. Terrasse ouverte dès 19h30, planches de charcuterie mixte ou fromage. Réservation de table fortement conseillée.',
-      prix: 10, prixTexte: 'le pass, 1 consommation offerte', places: 160, reservees: 0, complet: false, table: true,
+      prix: 10, prixTexte: 'le pass, 1 consommation offerte', places: 160, reservees: 52, complet: false, table: true,
       affiche: 'affiche-nouba.jpg', infos: ['DJ Baloo', 'Tubes dance et hits actuels', 'Terrasse dès 19h30', 'Planches charcuterie ou fromage'] },
     { id: 'beaujolais-2026-11-19', type: 'pass', gratuit: true, titre: 'Soirée Beaujolais Nouveau', date: '2026-11-19', heure: 'en soirée',
       texte: 'Exceptionnellement un jeudi, on fête l\'arrivée du Beaujolais Nouveau 2026 : ambiance DJ, planches apéritives et bouteilles disponibles au bar. Réservation de table conseillée.',
@@ -1148,11 +1148,11 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
       affiche: 'affiche-beaujolais.jpg', infos: ['Entrée gratuite', 'Ambiance DJ', 'Planches apéritives', 'Bouteilles sur place'] },
     { id: 'big-fiesta-2026-11-20', type: 'repas', titre: 'Big Fiesta, soirée concert', date: '2026-11-20', heure: 'de 19h30 à 2h',
       texte: 'Une formule qui réunit musique live, repas et soirée dansante : concert de Big Fiesta pendant le repas, puis DJ jusqu\'à 2h du matin.',
-      prix: 30, prixTexte: 'par personne : concert, repas et DJ', places: 160, reservees: 0, complet: false,
+      prix: 30, prixTexte: 'par personne : concert, repas et DJ, réglé sur place', places: 160, reservees: 129, complet: false, surPlace: true,
       affiche: 'affiche-big-fiesta.jpg', infos: ['Concert live', 'Repas', 'DJ jusqu\'à 2h'] },
     { id: 'johnny-blues-2026-11-27', type: 'repas', titre: 'Johnny Blues & Didier Darbon, soirée concert', date: '2026-11-27', heure: 'de 19h30 à 2h',
       texte: 'Une soirée Rock\'n\'Roll : un bon repas, Johnny Blues et Didier Darbon en concert, puis DJ pour continuer la fête sur la piste de danse.',
-      prix: 30, prixTexte: 'par personne : repas, concert et DJ', places: 160, reservees: 0, complet: false,
+      prix: 30, prixTexte: 'par personne : repas, concert et DJ, réglé sur place', places: 160, reservees: 68, complet: false, surPlace: true,
       affiche: 'affiche-johnny-blues.jpg', infos: ['Concert Rock\'n\'Roll', 'Repas', 'DJ après le concert'] },
     { id: 'reveillon-2026-12-31', type: 'repas', titre: 'Réveillon du jour de l\'an', date: '2026-12-31', heure: 'de 20h à 5h du matin',
       texte: 'Menu de réveillon, dont dos de cabillaud sauce champagne ou plat au canard et gratin dauphinois truffé, plateau de fromage, bûche rémoise aux biscuits roses de Reims. Menu enfant jusqu\'à 15 ans : 30 €.',
@@ -1520,11 +1520,11 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
       } else {
         var n = qty[e.id] || Math.min(2, left);
         book = '<div class="stepper" role="group" aria-label="Nombre de places"><button type="button" data-ev="' + e.id + '" data-d="-1" aria-label="Une place de moins">−</button><output>' + n + '</output><button type="button" data-ev="' + e.id + '" data-d="1" aria-label="Une place de plus">+</button></div>' +
-          '<span class="total">' + n + ' × ' + euro(e.prix) + ' = ' + euro(n * e.prix) + '<br>Acompte 30 % : <b>' + euro(Math.round(n * e.prix * DEPOSIT)) + '</b></span>' +
+          '<span class="total">' + n + ' × ' + euro(e.prix) + ' = ' + euro(n * e.prix) + '<br>' + (e.surPlace ? 'Réglé sur place, le soir même' : 'Acompte 30 % : <b>' + euro(Math.round(n * e.prix * DEPOSIT)) + '</b>') + '</span>' +
           '<a class="btn btn-main" href="#reserver" data-book="' + e.id + '" data-kind="soiree">Réserver ' + n + ' place' + (n > 1 ? 's' : '') + '</a>';
       }
       var seats = '';
-      if (e.type === 'repas' && !full) {
+      if (!full && !e.gratuit) {
         var pct = Math.min(100, Math.round((e.reservees || 0) / evCap(e) * 100));
         seats = '<div class="ev-seats"><div class="bar"><i class="' + (left <= 20 ? 'warn' : '') + '" style="width:' + pct + '%"></i></div><p>' + (left <= 20 ? '<b>Plus que ' + left + ' place' + (left > 1 ? 's' : '') + '</b>' : '<b>' + left + ' places disponibles</b>') + ' sur ' + evCap(e) + '.</p></div>';
       }
@@ -1675,16 +1675,16 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
     $('#passNote').hidden = !pass;
     if (pass) $('#passNote').textContent = ev && ev.gratuit ? 'Entrée gratuite : aucun paiement, les consommations se règlent sur place. Réservation de table conseillée.' : ev ? 'Pass ' + euro(ev.prix) + ' par personne, avec 1 consommation. Il se règle sur place, le soir même : aucun paiement en ligne.' + (ev.table ? ' Réservation de table conseillée.' : '') : 'Le pass soirée comprend l\'entrée et une consommation. Il se règle sur place.';
     $('#waitNote').hidden = !wait;
-    $('#acompteBox').hidden = !(soiree && ev && !wait);
+    $('#acompteBox').hidden = !(soiree && ev && !wait && !ev.surPlace);
     $('#date').readOnly = !!ev; if (ev) $('#date').value = ev.date;
     $('label[for=fGuests]').textContent = pass && !(ev && ev.gratuit) ? 'Nombre de pass' : wait ? 'Nombre de personnes' : 'Nombre d\'invités';
     $('#fGuests').min = f === 'conviv' ? MIN_CONVIV : 1;
     $('#fGuests').max = ev && !wait && soiree ? Math.max(1, evLeft(ev)) : ev ? 20 : MAX;
     var g = +$('#fGuests').value || 0;
-    $('#acompteAmount').textContent = soiree && ev && !wait ? 'Soit ' + euro(Math.round(g * ev.prix * DEPOSIT * 100) / 100) + ' pour ' + g + ' place' + (g > 1 ? 's' : '') + ' à ' + euro(ev.prix) + '.' : '';
+    $('#acompteAmount').textContent = soiree && ev && !wait && !ev.surPlace ? 'Soit ' + euro(Math.round(g * ev.prix * DEPOSIT * 100) / 100) + ' pour ' + g + ' place' + (g > 1 ? 's' : '') + ' à ' + euro(ev.prix) + '.' : '';
 
-    var acompte = soiree && ev && !wait ? Math.round(g * ev.prix * DEPOSIT * 100) / 100 : 0;
-    $('#send').textContent = acompte ? 'Payer l\'acompte de ' + euro(acompte) : pass ? (ev && ev.gratuit ? 'Réserver ma table' : 'Réserver mon pass') : wait ? 'M\'inscrire sur la liste d\'attente' : 'Envoyer ma demande de réservation';
+    var acompte = soiree && ev && !wait && !ev.surPlace ? Math.round(g * ev.prix * DEPOSIT * 100) / 100 : 0;
+    $('#send').textContent = acompte ? 'Payer l\'acompte de ' + euro(acompte) : soiree && ev && ev.surPlace && !wait ? 'Réserver ' + g + ' place' + (g > 1 ? 's' : '') : pass ? (ev && ev.gratuit ? 'Réserver ma table' : 'Réserver mon pass') : wait ? 'M\'inscrire sur la liste d\'attente' : 'Envoyer ma demande de réservation';
     checkPlateaux();
   }
   /* Plateaux dans le formulaire */
@@ -1744,6 +1744,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
     var quoi = wait ? 'LISTE D\'ATTENTE : ' + ev.titre + ' (' + evDate(ev).long + '), ' + g + ' personne' + (g > 1 ? 's' : '')
       : f === 'pass' && ev && ev.gratuit ? 'Table, entrée gratuite : ' + ev.titre + ' (' + evDate(ev).long + '), ' + g + ' personne' + (g > 1 ? 's' : '')
       : f === 'pass' && ev ? 'Pass soirée : ' + ev.titre + ' (' + evDate(ev).long + '), ' + g + ' pass à ' + euro(ev.prix) + ', réglés sur place' + (ev.table ? ', table souhaitée' : '')
+      : f === 'soiree' && ev && ev.surPlace ? 'Soirée repas : ' + ev.titre + ' (' + evDate(ev).long + '), ' + g + ' place' + (g > 1 ? 's' : '') + ' à ' + euro(ev.prix) + ', réglé sur place'
       : f === 'soiree' && ev ? 'Soirée repas : ' + ev.titre + ' (' + evDate(ev).long + '), ' + g + ' place' + (g > 1 ? 's' : '') + ' à ' + euro(ev.prix) + ', acompte 30 % : ' + euro(Math.round(g * ev.prix * DEPOSIT))
       : (f === 'conviv' ? 'Convivialité, menu ' + MENUS[state.menu].nom : 'Privatisation') + ', ' + g + ' invités' + (opts.length ? ', options : ' + opts.join(', ') : '');
     var pl = plateauxTxt();
@@ -1754,7 +1755,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
     if ($('#org').value.trim()) L.push('Entreprise / organisation : ' + $('#org').value.trim());
     L.push('E-mail : ' + $('#email').value.trim(), 'Téléphone : ' + $('#tel').value.trim());
     if ($('#msg').value.trim()) L.push('', 'Précisions :', $('#msg').value.trim());
-    if (f === 'soiree' && ev && !wait) L.push('', 'Je règle l\'acompte de 30 % par le lien sécurisé dès réception.');
+    if (f === 'soiree' && ev && !wait && !ev.surPlace) L.push('', 'Je règle l\'acompte de 30 % par le lien sécurisé dès réception.');
     L.push('', 'Merci,', $('#prenom').value.trim() + ' ' + $('#nom').value.trim());
     var label = wait ? 'Liste d\'attente' : f === 'pass' ? 'Pass soirée' : f === 'soiree' ? 'Soirée repas' : 'Réservation';
     return { subject: label + ', ' + (ev ? ev.titre : occasion()) + (d ? ', ' + dateFr : ''), text: L.join('\n') };
@@ -1777,7 +1778,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
     var fail2 = function (msg) { say(msg || 'La demande n\'est pas partie. Réessayez, ou appelez-nous au 03 26 07 59 10.'); btn.disabled = false; btn.textContent = label; };
     if (!ONLINE) { fail2('Le formulaire fonctionne une fois le site en ligne. En attendant, appelez-nous au 03 26 07 59 10.'); return; }
     var post = function (url) { return fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(payload) }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { j.httpOk = r.ok; return j; }); }); };
-    if (f === 'soiree' && ev && !wait) {
+    if (f === 'soiree' && ev && !wait && !ev.surPlace) {
       /* Soirée repas : paiement de l'acompte sur Stripe */
       post(CHECKOUT_ENDPOINT).then(function (j) {
         if (j.httpOk && j.url) { window.location.href = j.url; return; }
@@ -1787,9 +1788,11 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
       return;
     }
     post(FORM_ENDPOINT).then(function (j) {
+      if (j.error === 'complet') { ev.reservees = evCap(ev) - (j.restant || 0); renderEvents(); renderCal(); syncForm(); fail2(j.restant ? 'Il ne reste que ' + j.restant + ' place' + (j.restant > 1 ? 's' : '') + ' pour cette soirée.' : 'Cette soirée vient d\'être complète. Vous pouvez rejoindre la liste d\'attente.'); return; }
       if (!j.httpOk) throw 0;
-      var q = new URLSearchParams({ type: wait ? 'attente' : f === 'pass' ? 'pass' : 'demande', prenom: $('#prenom').value.trim() });
-      if (ev) { q.set('soiree', ev.titre); q.set('date', ev.date); q.set('n', $('#fGuests').value); if (f === 'pass') { q.set('prix', ev.prix); if (ev.gratuit) q.set('gratuit', '1'); } }
+      var place = f === 'soiree' && ev && ev.surPlace && !wait;
+      var q = new URLSearchParams({ type: wait ? 'attente' : f === 'pass' ? 'pass' : place ? 'place' : 'demande', prenom: $('#prenom').value.trim() });
+      if (ev) { q.set('soiree', ev.titre); q.set('date', ev.date); q.set('n', $('#fGuests').value); if (f === 'pass' || place) { q.set('prix', ev.prix); if (ev.gratuit) q.set('gratuit', '1'); } }
       window.location.href = 'merci.html?' + q.toString();
     }).catch(function () { fail2(); });
   });

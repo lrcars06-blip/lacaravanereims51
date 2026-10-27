@@ -152,7 +152,7 @@ function ligneResa(c) {
   const m = c.metadata || {}, ev = soiree(m.event_id) || { titre: m.event_id, prix: 0, places: 160 };
   const pers = parseInt(m.places, 10) || 0, attente = m.formule === 'attente';
   return { event: m.event_id, titre: ev.titre, capacite: ev.places, nom: c.name, email: c.email, tel: m.telephone || c.phone, personnes: pers,
-    statut: attente ? 'attente' : 'confirmé', paiement: attente ? 'Liste d\'attente' : `Pass sur place (${euro(pers * ev.prix)})`, ref: c.id,
+    statut: attente ? 'attente' : 'confirmé', paiement: attente ? 'Liste d\'attente' : m.formule === 'surplace' ? `Repas réglé sur place (${euro(pers * ev.prix)})` : `Pass sur place (${euro(pers * ev.prix)})`, ref: c.id,
     date: c.created ? new Date(c.created * 1000).toISOString() : undefined };
 }
 /* Rattrapage : renvoie au Sheet toutes les réservations Stripe des soirées à venir (sans doublon, le Sheet dédoublonne par réf). */

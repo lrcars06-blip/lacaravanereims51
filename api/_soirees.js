@@ -20,7 +20,7 @@ module.exports = { DEPOSIT: 0.3, SOIREES: [
     "heure": "de 19h30 à 2h",
     "prix": 10,
     "places": 160,
-    "reservees": 0,
+    "reservees": 143,
     "complet": false
   },
   {
@@ -54,7 +54,7 @@ module.exports = { DEPOSIT: 0.3, SOIREES: [
     "heure": "de 19h30 à 2h",
     "prix": 10,
     "places": 160,
-    "reservees": 0,
+    "reservees": 137,
     "complet": false
   },
   {
@@ -65,7 +65,7 @@ module.exports = { DEPOSIT: 0.3, SOIREES: [
     "heure": "de 19h30 à 2h",
     "prix": 10,
     "places": 160,
-    "reservees": 0,
+    "reservees": 52,
     "complet": false
   },
   {
@@ -88,8 +88,9 @@ module.exports = { DEPOSIT: 0.3, SOIREES: [
     "heure": "de 19h30 à 2h",
     "prix": 30,
     "places": 160,
-    "reservees": 0,
-    "complet": false
+    "reservees": 129,
+    "complet": false,
+    "surPlace": true
   },
   {
     "id": "johnny-blues-2026-11-27",
@@ -99,8 +100,9 @@ module.exports = { DEPOSIT: 0.3, SOIREES: [
     "heure": "de 19h30 à 2h",
     "prix": 30,
     "places": 160,
-    "reservees": 0,
-    "complet": false
+    "reservees": 68,
+    "complet": false,
+    "surPlace": true
   },
   {
     "id": "reveillon-2026-12-31",
