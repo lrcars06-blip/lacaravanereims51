@@ -28,11 +28,15 @@ module.exports = async (req, res) => {
   if (new Date(ev.date + 'T23:59:59') < new Date()) return L.json(res, 400, { ok: false, error: 'passee' });
 
   try {
+    const counts = await L.sheetCounts();
+    const vendues = counts ? (counts[ev.id] || 0) : await L.placesVendues(ev.id);
     if (!lien) {
       if (ev.complet) return L.json(res, 409, { ok: false, error: 'complet', restant: 0 });
-      const counts = await L.sheetCounts();
-      const vendues = counts ? (counts[ev.id] || 0) : await L.placesVendues(ev.id);
       const restant = Math.max(0, ev.places - ev.reservees - vendues);
+      if (places > restant) return L.json(res, 409, { ok: false, error: 'complet', restant });
+    } else {
+      // Lien privé : plafond de la salle (ev.places) sur l'ensemble des acomptes payés via le lien (lignes « confirmé » du Sheet).
+      const restant = Math.max(0, ev.places - vendues);
       if (places > restant) return L.json(res, 409, { ok: false, error: 'complet', restant });
     }
 

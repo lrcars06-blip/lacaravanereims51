@@ -26,7 +26,9 @@
 
 ## Acompte des clients ayant réservé par téléphone (soirées complètes)
 Lien privé par soirée, à envoyer par La Caravane à ses clients : `acompte.html?s=<id soirée>&k=<clé>` (clés dans `api/_acomptes.js`).
-Le client saisit nom, e-mail, téléphone, adultes et enfants, puis paie 30 % (pas de contrôle de places : elles sont déjà comptées).
+Le client saisit nom, e-mail, téléphone, adultes et enfants, puis paie 30 %. Plafond : la capacité de la soirée (160) sur l'ensemble des
+lignes « confirmé » du Sheet ; au-delà, le paiement est refusé. Pour ces soirées, ne pas ajouter les réservations téléphoniques à la main
+dans le Sheet (chaque client s'y inscrit en payant), sinon elles compteraient deux fois.
 Même circuit que le site : facture d'acompte, e-mails, ligne dans le Sheet, rappel la veille, compte rendu.
 Pour désactiver un lien : supprimer sa ligne dans `api/_acomptes.js`. Pour une nouvelle soirée : ajouter une ligne avec une nouvelle clé.
 
