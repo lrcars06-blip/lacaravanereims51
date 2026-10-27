@@ -17,6 +17,7 @@
 ## Suivi des réservations : Google Sheet « Réservations La Caravane »
 - Compte Google de La Caravane. Script : `sheet/apps-script.gs` (copie de référence de Extensions > Apps Script).
 - Chaque pass, liste d'attente et acompte payé y est inscrit automatiquement (réf Stripe en colonne I).
+- Onglet `Par soirée` (premier onglet) : choisir une soirée dans la case jaune → chiffres clés et liste de ses réservations ; case « Afficher aussi les annulées ». Mise en forme : fonction `miseEnForme` du script (relançable).
 - Onglet `Soirees` : capacité, réservées (statut « confirmé ») et restantes, par soirée (ajoutée automatiquement).
 - Remboursement total dans Stripe : la ligne passe automatiquement en « annulé » (webhook charge.refunded) ; remboursement partiel : noté dans la colonne Paiement, la ligne reste confirmée.
 - Annuler : passer le Statut à « annulé » (ne pas supprimer la ligne). La place se libère sur le site (jauge et paiement),

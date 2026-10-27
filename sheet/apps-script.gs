@@ -135,3 +135,90 @@ function liste(event) {
 
 function feuille() { return SpreadsheetApp.getActive().getSheetByName('Reservations'); }
 function json(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
+
+// ===== Mise en forme (à relancer sans risque) : onglet « Par soirée », couleurs, filtres =====
+function miseEnForme() {
+  const ss = SpreadsheetApp.getActive(), r = feuille(), s = ss.getSheetByName('Soirees');
+  const NOIR = '#1D1338', CREME = '#FFF7E8', OR = '#FFC83D';
+
+  // 1. Soirées de l'agenda présentes dans l'onglet Soirees (les nouvelles s'ajoutent toutes seules)
+  [['halloween-party-2026-10-30', 160, 'Halloween Party'], ['halloween-repas-2026-10-31', 160, 'Halloween, soirée repas'],
+   ['celibataires-2026-11-06', 160, 'Soirée célibataires'], ['reveillon-2026-12-31', 160, 'Réveillon du jour de l\'an']]
+    .forEach((x) => ajouterSoiree(x[0], x[1], x[2]));
+  s.getRange('F1:G1').setValues([['soirée (date · titre)', 'date']]);
+  const fF = [], fG = [];
+  for (let i = 2; i <= 200; i++) {
+    const d = 'RIGHT(A' + i + ';10)';
+    fG.push(['=IF(A' + i + '="";"";DATE(VALUE(LEFT(' + d + ';4));VALUE(MID(' + d + ';6;2));VALUE(RIGHT(' + d + ';2))))']);
+    fF.push(['=IF(A' + i + '="";"";PROPER(TEXT(G' + i + ';"ddd dd/mm"))&" · "&IF(E' + i + '="";A' + i + ';E' + i + '))']);
+  }
+  s.getRange(2, 7, 199, 1).setFormulas(fG).setNumberFormat('dd/mm/yyyy');
+  s.getRange(2, 6, 199, 1).setFormulas(fF);
+  s.getRange('A1:G1').setFontWeight('bold').setBackground(NOIR).setFontColor(CREME);
+  s.setColumnWidth(5, 220); s.setColumnWidth(6, 260);
+  s.setConditionalFormatRules([
+    SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=AND($A2<>"";$D2<=0)').setBackground('#FFD6D1').setFontColor('#7A1F16').setRanges([s.getRange('A2:G200')]).build(),
+    SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=AND($A2<>"";$D2<=20)').setBackground('#FFF1C9').setRanges([s.getRange('A2:G200')]).build(),
+  ]);
+
+  // 2. Onglet Reservations : couleurs par statut, filtre, largeurs
+  r.setConditionalFormatRules([
+    SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=$G2="annulé"').setFontColor('#9A93A8').setStrikethrough(true).setRanges([r.getRange('A2:I1000')]).build(),
+    SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=$G2="attente"').setBackground('#FFF1C9').setRanges([r.getRange('A2:I1000')]).build(),
+    SpreadsheetApp.newConditionalFormatRule().whenTextEqualTo('confirmé').setBackground('#DDF5CF').setFontColor('#24601A').setBold(true).setRanges([r.getRange('G2:G1000')]).build(),
+  ]);
+  if (!r.getFilter()) r.getRange('A1:I1000').createFilter();
+  [140, 190, 170, 220, 120, 90, 100, 260, 200].forEach((w, i) => r.setColumnWidth(i + 1, w));
+
+  // 3. Onglet « Par soirée »
+  const v = ss.getSheetByName('Par soirée') || ss.insertSheet('Par soirée', 0);
+  v.clear(); v.clearConditionalFormatRules(); v.getRange('A1:Z1000').clearDataValidations();
+  v.setHiddenGridlines(true);
+  v.getRange('A1:H1000').setFontFamily('Arial').setFontSize(11).setFontColor(NOIR).setVerticalAlignment('middle');
+  v.getRange('A1').setValue('Réservations par soirée').setFontSize(20).setFontWeight('bold');
+  v.getRange('A2').setValue('Choisissez la soirée dans la case jaune. La liste se met à jour toute seule.').setFontColor('#5B4F78').setFontSize(10);
+
+  // Liste des soirées triée par date (colonne Z cachée) + identifiant de la soirée choisie (Z1)
+  v.getRange('Z2').setFormula('=IFERROR(SORT(FILTER(Soirees!F2:F200;Soirees!A2:A200<>"");FILTER(Soirees!G2:G200;Soirees!A2:A200<>"");TRUE);"")');
+  v.getRange('Z1').setFormula('=IFERROR(INDEX(Soirees!A2:A200;MATCH(B4;Soirees!F2:F200;0));"")');
+  v.hideColumns(26);
+
+  v.getRange('A4').setValue('Soirée').setFontWeight('bold');
+  v.getRange('B4:D4').merge().setBackground('#FFF1C9').setFontWeight('bold').setFontSize(13)
+    .setBorder(true, true, true, true, false, false, OR, SpreadsheetApp.BorderStyle.SOLID_MEDIUM)
+    .setDataValidation(SpreadsheetApp.newDataValidation().requireValueInRange(v.getRange('Z2:Z200'), true).setAllowInvalid(false).build());
+  v.getRange('F4').insertCheckboxes(); v.getRange('G4').setValue('Afficher aussi les annulées').setFontColor('#5B4F78');
+
+  // Chiffres clés
+  const cartes = [['Réservations', '=IF($Z$1="";"";COUNTIFS(Reservations!B:B;$Z$1;Reservations!G:G;"confirmé"))'],
+    ['Personnes', '=IF($Z$1="";"";SUMIFS(Reservations!F:F;Reservations!B:B;$Z$1;Reservations!G:G;"confirmé"))'],
+    ['Places restantes', '=IF($Z$1="";"";IFERROR(INDEX(Soirees!D2:D200;MATCH($Z$1;Soirees!A2:A200;0));""))'],
+    ['Liste d\'attente', '=IF($Z$1="";"";SUMIFS(Reservations!F:F;Reservations!B:B;$Z$1;Reservations!G:G;"attente"))']];
+  cartes.forEach((c, i) => {
+    const col = 1 + i * 2;
+    v.getRange(6, col, 1, 2).merge().setValue(c[0]).setFontColor('#5B4F78').setFontSize(10).setBackground(CREME).setHorizontalAlignment('center');
+    v.getRange(7, col, 1, 2).merge().setFormula(c[1]).setFontSize(22).setFontWeight('bold').setBackground(CREME).setHorizontalAlignment('center');
+  });
+
+  // Tableau des réservations de la soirée choisie
+  v.getRange('A9:G9').setValues([['Date', 'Nom', 'Téléphone', 'E-mail', 'Personnes', 'Statut', 'Paiement']])
+    .setFontWeight('bold').setBackground(NOIR).setFontColor(CREME);
+  v.getRange('A10').setFormula('=IF($Z$1="";"";IFERROR(SORT(CHOOSECOLS(FILTER(Reservations!A2:H;Reservations!B2:B=$Z$1;(Reservations!G2:G<>"annulé")+($F$4=TRUE));1;3;5;4;6;7;8);1;TRUE);"Aucune réservation pour cette soirée"))');
+  v.getRange('A10:A500').setNumberFormat('dd/mm hh:mm');
+  v.getRange('C10:C500').setNumberFormat('@');
+  v.setConditionalFormatRules([
+    SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=$F10="annulé"').setFontColor('#9A93A8').setStrikethrough(true).setRanges([v.getRange('A10:G500')]).build(),
+    SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=$F10="attente"').setBackground('#FFF1C9').setRanges([v.getRange('A10:G500')]).build(),
+    SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=AND($A10<>"";ISEVEN(ROW()))').setBackground('#F6EEDC').setRanges([v.getRange('A10:G500')]).build(),
+  ]);
+  [120, 200, 130, 230, 95, 95, 300].forEach((w, i) => v.setColumnWidth(i + 1, w));
+  v.setRowHeight(4, 34); v.setRowHeight(7, 44); v.setFrozenRows(9);
+
+  // Soirée sélectionnée par défaut : la prochaine à venir
+  SpreadsheetApp.flush();
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const lignes = s.getRange(2, 1, 199, 7).getValues().filter((x) => x[0] && x[6] instanceof Date && x[6] >= today).sort((a, b) => a[6] - b[6]);
+  if (lignes.length && !v.getRange('B4').getValue()) v.getRange('B4').setValue(lignes[0][5]);
+  ss.setActiveSheet(v); ss.moveActiveSheet(1);
+  Logger.log('Mise en forme OK');
+}
