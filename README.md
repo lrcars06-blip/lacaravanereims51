@@ -10,7 +10,7 @@
 - api/places.js : places déjà payées, pour la jauge des soirées
 - api/session.js : récapitulatif affiché sur merci.html
 - api/rappels.js : e-mail de rappel la veille de la soirée (tous les jours à 10h, via vercel.json)
-- api/compte-rendu.js : la veille de chaque soirée vers 17h-18h, liste complète des réservations du site (nom, e-mail, téléphone, personnes, observations, case Vu) envoyée à RESERVATION_EMAIL
+- api/compte-rendu.js : la veille de chaque soirée vers 17h-18h, liste complète des réservations (site + lignes ajoutées à la main dans le Sheet) (nom, e-mail, téléphone, personnes, observations, case Vu) envoyée à RESERVATION_EMAIL
 - api/version.js : commit en ligne, utilisé par deploy.sh
 - api/_soirees.js : prix et capacité des soirées côté paiement (généré depuis index.html)
 
@@ -31,6 +31,9 @@ lignes « confirmé » du Sheet ; au-delà, le paiement est refusé. Pour ces so
 dans le Sheet (chaque client s'y inscrit en payant), sinon elles compteraient deux fois.
 Même circuit que le site : facture d'acompte, e-mails, ligne dans le Sheet, rappel la veille, compte rendu.
 Pour désactiver un lien : supprimer sa ligne dans `api/_acomptes.js`. Pour une nouvelle soirée : ajouter une ligne avec une nouvelle clé.
+
+## Jours d'ouverture
+Ouvert au public du vendredi au dimanche. Du lundi au jeudi : privatisation uniquement (formule Convivialité refusée ces jours-là, sauf soirée de l'agenda), côté formulaire (index.html, fermePublic) et côté serveur (api/reserver.js).
 
 ## Factures d'acompte
 Stripe génère une facture (préfixe CARAV) pour chaque acompte payé et l'envoie au client avec son reçu

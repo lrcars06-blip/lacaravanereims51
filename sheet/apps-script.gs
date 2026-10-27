@@ -57,6 +57,7 @@ function doPost(e) {
     const d = JSON.parse(e.postData.contents);
     if (!d.secret || d.secret !== P.getProperty('SECRET')) return json({ ok: false, error: 'interdit' });
     if (d.action === 'annules') return json({ ok: true, refs: annules() });
+    if (d.action === 'liste') return json({ ok: true, lignes: liste(d.event) });
     const lignes = d.action === 'lot' ? (d.lignes || []) : [d];
     let ajoutees = 0;
     const refs = new Set(feuille().getRange('I:I').getValues().flat().filter(String));
@@ -105,6 +106,14 @@ function restantes(event, counts) {
 
 function annules() {
   return feuille().getDataRange().getValues().slice(1).filter((r) => r[6] === 'annulé' && r[8]).map((r) => String(r[8]));
+}
+
+// Lignes d'une soirée (hors annulées), pour le compte rendu de la veille.
+function liste(event) {
+  return feuille().getDataRange().getValues().slice(1).filter((r) => r[1] === event && r[6] !== 'annulé').map((r) => ({
+    date: r[0] instanceof Date ? r[0].toISOString() : String(r[0] || ''), nom: String(r[2] || ''), email: String(r[3] || ''),
+    tel: String(r[4] || ''), personnes: Number(r[5]) || 0, statut: String(r[6] || ''), paiement: String(r[7] || ''), ref: String(r[8] || ''),
+  }));
 }
 
 function feuille() { return SpreadsheetApp.getActive().getSheetByName('Reservations'); }

@@ -292,6 +292,8 @@ dialog.box::backdrop{background:rgba(6,4,16,.94)}
 .cal-grid button,.cal-grid span{aspect-ratio:1;border-radius:10px;display:grid;place-items:center;font-weight:600;font-size:.95rem;border:0;background:none;color:var(--cream-dim);position:relative}
 .cal-grid span.past{opacity:.35}
 .cal-grid span.prive{color:rgba(250,235,211,.4);background:repeating-linear-gradient(135deg,rgba(250,235,211,.08) 0 4px,transparent 4px 8px);text-decoration:line-through}
+.cal-grid span.ferme{color:rgba(250,235,211,.38)}
+.cal-legend i.ferme-dot{border-radius:50%;background:none;border:1.5px solid rgba(250,235,211,.38)}
 .cal-legend i.prive-dot{border-radius:3px;background:repeating-linear-gradient(135deg,rgba(250,235,211,.45) 0 2px,transparent 2px 4px)}
 .cal-grid .today{box-shadow:inset 0 0 0 1.5px var(--line)}
 .cal-grid button{background:color-mix(in srgb,var(--c) 22%,transparent);color:var(--cream);cursor:pointer;transition:transform .15s ease,background-color .15s ease}
@@ -766,6 +768,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
           <li><i style="--c:var(--coral)"></i>Soirée repas, acompte 30 %</li>
           <li><i style="--c:rgba(250,235,211,.35)"></i>Complet</li>
           <li><i class="prive-dot"></i>Samedi privatisé, jusqu'au 30 novembre</li>
+          <li><i class="ferme-dot"></i>Lundi au jeudi : fermé au public, privatisation uniquement</li>
         </ul>
       </div>
       <div class="events" id="events"></div>
@@ -791,6 +794,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
     <div>
       <h2>Réservez votre date</h2>
       <p class="devis-intro">Dites-nous quand vous voulez venir et comment. Nous vous confirmons la disponibilité de la date.</p>
+      <p class="devis-intro"><strong>Ouvert au public du vendredi au dimanche.</strong> Du lundi au jeudi, La Caravane accueille uniquement les privatisations.</p>
       <div class="acompte" id="acompteBox">
         <strong>Un acompte de 30 % confirme votre place à la soirée repas</strong>, réglable en ligne par lien sécurisé.
         <p id="acompteAmount"></p>
@@ -1124,6 +1128,8 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
   var PLATEAU_SMS = '06 11 68 26 98';
   /* SAMEDIS PRIVATISÉS : plus de demande de réservation possible le samedi jusqu'à cette date incluse. */
   var SAMEDIS_PRIVES_JUSQU = '2026-11-30';
+  /* Ouvert au public vendredi, samedi, dimanche. Du lundi au jeudi : privatisation uniquement (sauf soirée de l'agenda). */
+  var FERME_PUBLIC_MSG = 'Du lundi au jeudi, La Caravane est fermée au public : seule la privatisation est possible. Choisissez un vendredi, un samedi ou un dimanche, ou la formule Privatisation.';
   var PHOTOS = '';
   /* TOUR_URL : adresse d'une visite 360° intégrable en iframe (Kuula, Matterport, ou une page /visite du site).
      L'ancienne visite virtuelle n'existe plus (erreur 404)
@@ -1494,6 +1500,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
   var calMonth = UPCOMING.length ? new Date(UPCOMING[0].date + 'T12:00:00') : new Date(calMin); calMonth.setDate(1);
   var calMax = UPCOMING.length ? new Date(UPCOMING[UPCOMING.length - 1].date + 'T12:00:00') : new Date(calMin); calMax.setDate(1);
   if (calMax < calMin) calMax = new Date(calMin);
+  function fermePublic(v) { if (!v) return false; var j = new Date(v + 'T12:00:00').getDay(); return j >= 1 && j <= 4 && !UPCOMING.some(function (x) { return x.date === v; }); }
   function samediPrive(v) { return !!v && new Date(v + 'T12:00:00').getDay() === 6 && v <= SAMEDIS_PRIVES_JUSQU; }
   function ymd(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
   function renderCal() {
@@ -1503,9 +1510,9 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
     for (var k = 0; k < first; k++) html += '<span aria-hidden="true"></span>';
     for (var dd = 1; dd <= days; dd++) {
       var date = new Date(y, m, dd), key = ymd(date), ev = UPCOMING.filter(function (x) { return x.date === key; })[0];
-      var cls = (date < todayD ? 'past' : '') + (+date === +todayD ? ' today' : '') + (!ev && date >= todayD && samediPrive(key) ? ' prive' : '');
+      var cls = (date < todayD ? 'past' : '') + (+date === +todayD ? ' today' : '') + (!ev && date >= todayD && samediPrive(key) ? ' prive' : '') + (!ev && date >= todayD && fermePublic(key) ? ' ferme' : '');
       html += ev ? '<button type="button" class="' + cls + '" style="--c:' + evColor(ev) + '" data-cal="' + ev.id + '" aria-pressed="' + (ev.id === activeId) + '" aria-label="' + dd + ' ' + MOIS_LONG[m] + ' : ' + esc(ev.titre) + (evFull(ev) ? ', complet' : '') + '">' + dd + '</button>'
-                 : '<span class="' + cls + '"' + (/prive/.test(cls) ? ' title="Privatisé"' : '') + '>' + dd + '</span>';
+                 : '<span class="' + cls + '"' + (/prive/.test(cls) ? ' title="Privatisé"' : /ferme/.test(cls) ? ' title="Fermé au public, privatisation uniquement"' : '') + '>' + dd + '</span>';
     }
     $('#calGrid').innerHTML = html;
     $('#calPrev').disabled = calMonth <= calMin; $('#calNext').disabled = calMonth >= calMax;
@@ -1652,10 +1659,10 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
     return new Date(v + 'T19:00:00') - new Date() < PLATEAU_DELAI_H * 3600 * 1000;
   }
   function checkPlateaux() { $('#plWarn').textContent = plateauxTooLate() ? 'Les plateaux se commandent ' + PLATEAU_DELAI_H + ' h à l\'avance : pour cette date, envoyez-nous un SMS au ' + PLATEAU_SMS + '.' : ''; }
-  $('#date').addEventListener('change', function () { checkPlateaux(); var m = RULES.date($('#date').value); if (m && samediPrive($('#date').value)) fail('date', m); });
+  $('#date').addEventListener('change', function () { checkPlateaux(); var m = RULES.date($('#date').value); if (m && (samediPrive($('#date').value) || m === FERME_PUBLIC_MSG)) fail('date', m); else if (!m) fail('date', ''); });
   form.addEventListener('change', function (e) {
     if (e.target.name === 'fformule' || e.target.id === 'fEvent' || e.target.id === 'fGuests') {
-      if (e.target.name === 'fformule' && (e.target.value === 'exclu' || e.target.value === 'conviv')) { state.formule = e.target.value; render(); return; }
+      if (e.target.name === 'fformule' && (e.target.value === 'exclu' || e.target.value === 'conviv')) { state.formule = e.target.value; render(); var md = $('#date').value && RULES.date($('#date').value); fail('date', md === FERME_PUBLIC_MSG ? md : ''); return; }
       syncForm(); return;
     }
     if (e.target.name !== 'profil') return;
@@ -1672,7 +1679,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
     org: function (v) { return $('#org').required && !v ? 'Indiquez le nom de votre entreprise ou organisation.' : ''; },
     email: function (v) { return !v ? 'Indiquez votre e-mail pour recevoir le devis.' : /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v) ? '' : 'Cet e-mail semble incomplet. Exemple : prenom@exemple.fr'; },
     tel: function (v) { return !v ? 'Indiquez un numéro où vous joindre.' : v.replace(/\D/g, '').length >= 9 ? '' : 'Ce numéro semble trop court. Exemple : 06 12 34 56 78'; },
-    date: function (v) { return !v ? 'Choisissez la date de votre soirée.' : v < $('#date').min ? 'Choisissez une date à venir.' : samediPrive(v) && !$('#date').readOnly ? 'La salle est déjà privatisée tous les samedis jusqu\'au 30 novembre. Choisissez un autre jour.' : ''; },
+    date: function (v) { return !v ? 'Choisissez la date de votre soirée.' : v < $('#date').min ? 'Choisissez une date à venir.' : samediPrive(v) && !$('#date').readOnly ? 'La salle est déjà privatisée tous les samedis jusqu\'au 30 novembre. Choisissez un autre jour.' : fFormule() === 'conviv' && !$('#date').readOnly && fermePublic(v) ? FERME_PUBLIC_MSG : ''; },
     fGuests: function (v) { var n = +v, min = +$('#fGuests').min, max = +$('#fGuests').max; return !n ? 'Indiquez le nombre de personnes.' : n < min ? 'Cette formule est réservable à partir de ' + min + ' personnes.' : n > max ? 'Maximum ' + max + ' pour cette réservation.' : ''; },
     msg: function () { return ''; }
   };

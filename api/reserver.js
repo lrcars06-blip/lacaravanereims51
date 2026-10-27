@@ -12,6 +12,9 @@ module.exports = async (req, res) => {
   const message = L.clean(b.message, 5000);
   if (!nom || !L.isEmail(email) || tel.replace(/\D/g, '').length < 9 || !message) return L.json(res, 400, { ok: false, error: 'champs' });
   if (!L.env('RESEND_API_KEY') || !L.env('RESERVATION_EMAIL')) return L.json(res, 500, { ok: false, error: 'configuration' });
+  // Fermé au public du lundi au jeudi : seule la privatisation est possible ces jours-là (sauf soirée de l'agenda).
+  const jour = /^\d{4}-\d{2}-\d{2}$/.test(String(b.date || '')) ? new Date(b.date + 'T12:00:00').getDay() : -1;
+  if (L.clean(b.formule, 20) === 'conviv' && jour >= 1 && jour <= 4 && !L.SOIREES.some((s) => s.date === b.date)) return L.json(res, 400, { ok: false, error: 'ferme' });
 
   // 1. La demande, pour La Caravane (répondre = écrire au client)
   const interne = await L.sendMail({ to: L.env('RESERVATION_EMAIL'), subject, text: message, replyTo: email });

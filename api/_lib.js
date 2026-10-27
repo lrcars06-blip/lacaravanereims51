@@ -130,6 +130,11 @@ async function sheetCounts() {
     return j && j.counts ? j.counts : null;
   } catch (e) { console.error('Sheet', e.message); return null; }
 }
+/* Lignes du Sheet pour une soirée (hors annulées), ou [] si le Sheet est inactif. */
+async function sheetListe(eventId) {
+  const j = await sheetPost({ action: 'liste', event: eventId });
+  return (j && j.lignes) || [];
+}
 /* Références Stripe des réservations annulées dans le Sheet. */
 async function sheetAnnules() {
   const j = await sheetPost({ action: 'annules' });
@@ -192,4 +197,4 @@ async function acomptesSoiree(eventId) {
   return out;
 }
 
-module.exports = { lienAcompte, totalResa, sheetPost, sheetCounts, sheetAnnules, ligneAcompte, ligneResa, syncSheet, enregistrerResa, resasSoiree, acomptesSoiree, env, clean, isEmail, euro, dateFr, esc, soiree, siteUrl, readJson, readRaw, stripe, placesVendues, verifStripe, sendMail, mailHtml, json, SOIREES, DEPOSIT };
+module.exports = { sheetListe, lienAcompte, totalResa, sheetPost, sheetCounts, sheetAnnules, ligneAcompte, ligneResa, syncSheet, enregistrerResa, resasSoiree, acomptesSoiree, env, clean, isEmail, euro, dateFr, esc, soiree, siteUrl, readJson, readRaw, stripe, placesVendues, verifStripe, sendMail, mailHtml, json, SOIREES, DEPOSIT };

@@ -50,13 +50,23 @@ async function compteRendu(ev) {
     bloc = liste('Réservations', pass, false);
     if (attente.length) bloc += liste('Liste d\'attente', attente, false);
   }
-  subject = `Demain : ${ev.titre}, ${nbPers} personne${nbPers > 1 ? 's' : ''} réservée${nbPers > 1 ? 's' : ''} sur le site`;
+  // Réservations saisies à la main dans le Sheet (téléphone, SMS) : sans référence Stripe.
+  const aLaMain = (await L.sheetListe(ev.id)).filter((r) => r.statut === 'confirmé' && !/^(pi|cus|cs)_/.test(r.ref))
+    .map((r) => ({ t: Date.parse(r.date) / 1000 || 0, nom: r.nom, email: r.email, tel: r.tel, pers: r.personnes, obs: [r.paiement, 'saisie dans le Sheet'].filter(Boolean).join(' · ') }));
+  if (aLaMain.length) {
+    const n = aLaMain.reduce((t, r) => t + r.pers, 0);
+    nbPers += n;
+    lignes.push(['Ajoutées dans le Sheet (téléphone)', `${aLaMain.length} réservation${aLaMain.length > 1 ? 's' : ''}, ${n} personne${n > 1 ? 's' : ''}`]);
+    bloc += liste('Réservations ajoutées dans le Sheet', aLaMain, false);
+  }
+  lignes.push(['TOTAL attendu', `${nbPers} personne${nbPers > 1 ? 's' : ''}`]);
+  subject = `Demain : ${ev.titre}, ${nbPers} personne${nbPers > 1 ? 's' : ''} réservée${nbPers > 1 ? 's' : ''}`;
 
   return L.sendMail({
     to: L.env('RESERVATION_EMAIL'),
     subject,
     html: L.mailHtml({ titre: `Liste des réservations : ${ev.titre}`, intro: 'Voici toutes les réservations faites sur le site pour la soirée de demain. Imprimez ce mail pour le pointage à l\'arrivée.', lignes, bloc,
-      fin: 'Les réservations prises par téléphone ou par SMS ne figurent pas dans cette liste : ajoutez-les à la main.' }),
+      fin: 'Les réservations prises par téléphone figurent dans cette liste si elles ont été ajoutées dans le Google Sheet (statut « confirmé »).' }),
   });
 }
 
