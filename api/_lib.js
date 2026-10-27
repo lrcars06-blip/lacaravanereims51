@@ -171,11 +171,13 @@ async function enregistrerResa(meta, { nom, email, telephone }) {
   for (const [k, v] of Object.entries(meta)) if (v !== undefined && v !== null && v !== '') md[k] = String(v).slice(0, 490);
   return stripe('POST', '/customers', { name: nom, email, phone: telephone, description: `Réservation ${meta.formule} ${meta.event_id}`, metadata: { kind: 'resa', ...md } });
 }
+/* Réservations de test (clients Stripe) ignorées partout : Sheet, rattrapage, compte rendu. */
+const TESTS = new Set(['cus_VVpISzmFxpt5wq', 'cus_VVpHHdWdFTDFTY', 'cus_VVpDi6ikNzOA79', 'cus_VVleaIZQTqWsSf']);
 async function resasSoiree(eventId) {
   const out = []; let page;
   do {
     const r = await stripe('GET', '/customers/search', { query: `metadata['kind']:'resa' AND metadata['event_id']:'${eventId}'`, limit: 100, page });
-    out.push(...r.data);
+    out.push(...r.data.filter((c) => !TESTS.has(c.id)));
     page = r.has_more ? r.next_page : undefined;
   } while (page);
   return out;
