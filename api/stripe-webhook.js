@@ -40,7 +40,7 @@ module.exports = async (req, res) => {
       to: m.email || s.customer_details?.email,
       subject: `Votre place est confirmée : ${ev.titre}`,
       replyTo: L.env('RESERVATION_EMAIL') || undefined,
-      html: L.mailHtml({ titre: 'C\'est réservé !', intro: `Bonjour ${L.esc(m.nom || '')}, nous avons bien reçu votre acompte. Votre place est confirmée.`, lignes, fin: 'Le solde se règle sur place, le soir même. Pour toute question, répondez simplement à cet e-mail ou appelez-nous.' }),
+      html: L.mailHtml({ titre: 'C\'est réservé !', intro: `Bonjour ${L.esc(m.nom || '')}, nous avons bien reçu votre acompte. Votre place est confirmée.`, lignes, bloc: L.INFOS_SECURITE, fin: 'Le solde se règle sur place, le soir même. Pour toute question, répondez simplement à cet e-mail ou appelez-nous.' }),
     }),
     L.sendMail({
       to: L.env('RESERVATION_EMAIL'),

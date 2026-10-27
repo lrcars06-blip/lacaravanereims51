@@ -67,7 +67,7 @@ module.exports = async (req, res) => {
     // Suivi dans le Google Sheet (réf = client Stripe, pour dédoublonner et pour les annulations)
     await L.sheetPost(L.ligneResa({ name: nom, email, phone: tel, ...(client || {}), metadata: { ...meta, ...((client && client.metadata) || {}) } }));
   }
-  await L.sendMail({ to: email, subject: titre + ' : La Caravane', replyTo: L.env('RESERVATION_EMAIL'), html: L.mailHtml({ titre, intro, lignes, fin }) });
+  await L.sendMail({ to: email, subject: titre + ' : La Caravane', replyTo: L.env('RESERVATION_EMAIL'), html: L.mailHtml({ titre, intro, lignes, fin, bloc: ev && !attente && (f === 'pass' || (f === 'soiree' && ev.surPlace)) ? L.INFOS_SECURITE : '' }) });
 
   return L.json(res, 200, { ok: true });
 };

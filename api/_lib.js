@@ -98,6 +98,16 @@ ${fin ? `<p style="margin:0 0 6px;color:#1D1338;font-size:15px;line-height:1.55"
 </td></tr></table></td></tr></table></body></html>`;
 }
 
+/* Encadré ajouté aux e-mails de confirmation de réservation (texte fourni par La Caravane). */
+const INFOS_SECURITE = `<div style="margin:22px 0 18px;padding:18px 20px;border-radius:14px;background:#1D1338;color:#FAEBD3;font-size:14px;line-height:1.6">
+<p style="margin:0 0 10px;font-weight:700;letter-spacing:.04em;color:#FFC83D">INFORMATIONS IMPORTANTES – SÉCURITÉ &amp; RÉSERVATION</p>
+<p style="margin:0 0 10px">Pour le confort et la sécurité de tous, une tenue correcte est exigée. L’établissement est placé sous vidéosurveillance et dispose d’un service de sécurité.</p>
+<p style="margin:0 0 10px">La réservation ne garantit pas automatiquement l’admission. La direction et les agents de sécurité se réservent le droit d’entrée.</p>
+<p style="margin:0 0 10px">Pour des raisons de sécurité, les verres et boissons sont strictement interdits sur la piste de danse. Tout non-respect de cette consigne pourra entraîner une exclusion de l’établissement.</p>
+<p style="margin:0 0 10px">En cas d’annulation ou de modification du nombre de personnes, merci de nous prévenir dès que possible.</p>
+<p style="margin:0">Merci de votre compréhension et au plaisir de vous accueillir à La Caravane !</p>
+</div>`;
+
 function json(res, code, obj) { res.statusCode = code; res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.end(JSON.stringify(obj)); }
 
 /* ---------- Google Sheet « Réservations La Caravane » (Apps Script, voir sheet/apps-script.gs) ----------
@@ -197,4 +207,4 @@ async function acomptesSoiree(eventId) {
   return out;
 }
 
-module.exports = { sheetListe, lienAcompte, totalResa, sheetPost, sheetCounts, sheetAnnules, ligneAcompte, ligneResa, syncSheet, enregistrerResa, resasSoiree, acomptesSoiree, env, clean, isEmail, euro, dateFr, esc, soiree, siteUrl, readJson, readRaw, stripe, placesVendues, verifStripe, sendMail, mailHtml, json, SOIREES, DEPOSIT };
+module.exports = { INFOS_SECURITE, sheetListe, lienAcompte, totalResa, sheetPost, sheetCounts, sheetAnnules, ligneAcompte, ligneResa, syncSheet, enregistrerResa, resasSoiree, acomptesSoiree, env, clean, isEmail, euro, dateFr, esc, soiree, siteUrl, readJson, readRaw, stripe, placesVendues, verifStripe, sendMail, mailHtml, json, SOIREES, DEPOSIT };
