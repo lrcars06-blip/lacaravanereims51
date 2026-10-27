@@ -70,14 +70,20 @@ footer a{color:var(--cream)}
   function addCal(titre, date) { if (date) $('#actions').insertAdjacentHTML('beforeend', '<a class="btn btn-ghost" download="la-caravane.ics" href="' + ics(titre, date) + '">Ajouter à mon agenda</a>'); }
   var prenom = q.get('prenom') ? ' ' + esc(q.get('prenom')) : '';
 
-  if (type === 'soiree') {
+  if (type === 'soiree' || type === 'solde') {
     $('#t').textContent = 'C\'est réservé !';
     var id = q.get('session_id') || '';
     fetch('api/session?session_id=' + encodeURIComponent(id)).then(function (r) { return r.json(); }).then(function (j) {
       if (!j.ok) throw 0;
+      if (j.type === 'solde') {
+        $('#t').textContent = j.paye ? 'Tout est réglé !' : 'Paiement en cours';
+        $('#lead').innerHTML = j.paye ? 'Merci' + (j.prenom ? ' ' + esc(j.prenom) : '') + ', votre solde est bien reçu : votre réservation est entièrement payée. Un e-mail de confirmation vous a été envoyé.' : 'Votre paiement n\'est pas encore confirmé. Vous recevrez un e-mail dès qu\'il le sera.';
+        if (j.paye) { $('#body').innerHTML = rows([['Soirée', j.soiree], ['Date', dateFr(j.date) + (j.heure ? ', ' + j.heure : '')], ['Solde payé', euro(j.montant), true]]); addCal(j.soiree, j.date); }
+        return;
+      }
       if (!j.paye) { $('#t').textContent = 'Paiement en cours'; $('#lead').textContent = 'Votre paiement n\'est pas encore confirmé. Vous recevrez un e-mail dès qu\'il le sera.'; return; }
       $('#lead').innerHTML = 'Merci' + (j.prenom ? ' ' + esc(j.prenom) : '') + ', votre acompte est bien reçu : votre place est confirmée. Un e-mail récapitulatif vous a été envoyé.';
-      $('#body').innerHTML = rows([['Soirée', j.soiree], ['Date', dateFr(j.date) + (j.heure ? ', ' + j.heure : '')], ['Places', j.places], ['Acompte payé', euro(j.acompte)], ['Solde sur place', euro(j.solde), true], j.plateaux ? ['Plateaux', j.plateaux] : null]);
+      $('#body').innerHTML = rows([['Soirée', j.soiree], ['Date', dateFr(j.date) + (j.heure ? ', ' + j.heure : '')], ['Places', j.places], ['Acompte payé', euro(j.acompte)], [j.soldeLabel || 'Solde sur place', euro(j.solde), true], j.plateaux ? ['Plateaux', j.plateaux] : null]);
       addCal(j.soiree, j.date);
     }).catch(function () {
       $('#lead').textContent = 'Votre paiement a bien été transmis. Vous allez recevoir un e-mail de confirmation.';

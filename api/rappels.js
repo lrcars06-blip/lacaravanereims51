@@ -17,13 +17,13 @@ module.exports = async (req, res) => {
         if (m.rappel === 'envoye' || annules.has(pi.id)) continue;
         const ev = L.soiree(m.event_id) || { titre: m.event_id, date: demain, heure: '', prix: 0 };
         const places = parseInt(m.places, 10) || 0;
-        const solde = Math.max(0, L.totalResa(ev, m) - pi.amount_received / 100);
+        const solde = L.soldeRestant(ev, m, pi.amount_received / 100);
         const ok = await L.sendMail({
           to: m.email,
           subject: `C'est demain : ${ev.titre}`,
           replyTo: L.env('RESERVATION_EMAIL') || undefined,
           html: L.mailHtml({ titre: 'On vous attend demain !', intro: `Bonjour ${L.esc((m.nom || '').split(' ')[0])}, petit rappel de votre réservation à La Caravane.`,
-            lignes: [['Soirée', ev.titre], ['Date', `${L.dateFr(ev.date)}${ev.heure ? ', ' + ev.heure : ''}`], ['Places', String(places)], ['Solde à régler sur place', L.euro(solde)]],
+            lignes: [['Soirée', ev.titre], ['Date', `${L.dateFr(ev.date)}${ev.heure ? ', ' + ev.heure : ''}`], ['Places', String(places)], solde > 0 ? ['Solde à régler sur place', L.euro(solde)] : ['Paiement', 'Entièrement réglé']],
             fin: 'Adresse : 17 rue des Docks Rémois, Bétheny. Parking gratuit sur place.' }),
         });
         if (ok.ok) { envoyes++; await L.stripe('POST', '/payment_intents/' + pi.id, { metadata: { rappel: 'envoye' } }); }

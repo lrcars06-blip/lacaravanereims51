@@ -37,6 +37,11 @@ Pour désactiver un lien : supprimer sa ligne dans `api/_acomptes.js`. Pour une 
 ## Jours d'ouverture
 Ouvert au public du vendredi au dimanche. Du lundi au jeudi : privatisation uniquement (formule Convivialité refusée ces jours-là, sauf soirée de l'agenda), côté formulaire (index.html, fermePublic) et côté serveur (api/reserver.js).
 
+## Solde payé en ligne (Réveillon)
+Lien privé : `solde.html?s=<id soirée>&k=<clé>` (même clé que l'acompte, champ `solde` dans `api/_acomptes.js`).
+Le client saisit l'e-mail de son acompte → solde exact (total − acompte, enfants compris) → paiement Stripe + facture de solde.
+Webhook : acompte marqué `solde_paye`, mention « Soldé en ligne » dans le Sheet, e-mails client et La Caravane. Rappel et compte rendu indiquent « réglé ».
+
 ## Factures d'acompte
 Stripe génère une facture (préfixe CARAV) pour chaque acompte payé et l'envoie au client avec son reçu
 (`invoice_creation` dans api/checkout.js ; e-mails « Paiements réussis » activés dans Stripe).

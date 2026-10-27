@@ -95,13 +95,13 @@ input:focus-visible{outline:3px solid var(--bulb);outline-offset:1px;border-colo
     var acompte = (a * Math.round(ev.prix * ev.depot * 100) + e * Math.round(ev.prixEnfant * ev.depot * 100)) / 100;
     var total = a * ev.prix + e * ev.prixEnfant;
     $('#acompte').textContent = euro(acompte);
-    $('#solde').textContent = total ? 'Total ' + euro(total) + ', solde de ' + euro(total - acompte) + ' à régler sur place le soir même.' : '';
+    $('#solde').textContent = total ? 'Total ' + euro(total) + ', solde de ' + euro(total - acompte) + ' ' + (ev.soldeTexte || 'à régler sur place le soir même') + '.' : '';
   }
   fetch('api/checkout?s=' + encodeURIComponent(s) + '&k=' + encodeURIComponent(k)).then(function (r) { return r.json(); }).then(function (j) {
     if (!j.ok) return fail(j.error === 'passee' ? 'Cette soirée est passée.' : 'Ce lien n\'est pas valide. Contactez-nous au 03 26 07 59 10.');
     ev = j;
     $('#t').textContent = j.titre;
-    $('#lead').textContent = 'Vous avez réservé par téléphone pour le ' + dateFr(j.date) + (j.heure ? ', ' + j.heure : '') + '. Pour confirmer votre place, réglez l\'acompte de 30 % ci-dessous. Le solde se règle sur place.';
+    $('#lead').textContent = 'Vous avez réservé par téléphone pour le ' + dateFr(j.date) + (j.heure ? ', ' + j.heure : '') + '. Pour confirmer votre place, réglez l\'acompte de 30 % ci-dessous. Le solde se règle ' + (j.soldeTexte || 'sur place') + '.';
     $('#lblEnf').textContent = j.enfantTexte || 'Enfants';
     f.hidden = false; calc();
   }).catch(function () { fail('Impossible de charger la soirée. Réessayez dans un instant ou appelez-nous au 03 26 07 59 10.'); });

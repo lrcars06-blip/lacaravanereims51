@@ -33,10 +33,10 @@ async function compteRendu(ev) {
   if (ev.type === 'repas' && !ev.surPlace) {
     let acomptes = 0, soldes = 0;
     const resas = (await L.acomptesSoiree(ev.id)).filter((pi) => !annules.has(pi.id)).map((pi) => {
-      const m = pi.metadata || {}, pers = parseInt(m.places, 10) || 0, paye = pi.amount_received / 100, solde = Math.max(0, L.totalResa(ev, m) - paye);
+      const m = pi.metadata || {}, pers = parseInt(m.places, 10) || 0, paye = pi.amount_received / 100, solde = L.soldeRestant(ev, m, paye);
       acomptes += paye; soldes += solde;
       return { t: pi.created || 0, nom: m.nom, email: m.email, tel: m.telephone, pers,
-        obs: [`Acompte ${L.euro(paye)}, solde ${L.euro(solde)}`, m.enfants ? `dont ${m.enfants} enfant(s)` : '', m.occasion, m.plateaux, m.precisions].filter(Boolean).join(' · ') };
+        obs: [m.solde_paye ? `Acompte ${L.euro(paye)}, solde payé en ligne` : `Acompte ${L.euro(paye)}, solde ${L.euro(solde)}`, m.enfants ? `dont ${m.enfants} enfant(s)` : '', m.occasion, m.plateaux, m.precisions].filter(Boolean).join(' · ') };
     }).sort(ordre);
     nbPers = resas.reduce((t, r) => t + r.pers, 0);
     lignes.push(['Couverts réservés en ligne', `${nbPers} / ${ev.places}`], ['Acomptes encaissés', L.euro(acomptes)], ['Soldes à encaisser', L.euro(soldes)]);

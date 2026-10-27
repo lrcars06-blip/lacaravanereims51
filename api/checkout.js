@@ -10,7 +10,7 @@ module.exports = async (req, res) => {
     const ev = L.soiree(L.clean(q.get('s'), 120)), lien = ev && L.lienAcompte(ev.id, q.get('k'));
     if (!lien || ev.type !== 'repas') return L.json(res, 404, { ok: false });
     if (new Date(ev.date + 'T23:59:59') < new Date()) return L.json(res, 410, { ok: false, error: 'passee' });
-    return L.json(res, 200, { ok: true, titre: ev.titre, date: ev.date, heure: ev.heure, prix: ev.prix, prixEnfant: lien.prixEnfant, enfantTexte: lien.enfantTexte, depot: L.DEPOSIT });
+    return L.json(res, 200, { ok: true, titre: ev.titre, date: ev.date, heure: ev.heure, prix: ev.prix, prixEnfant: lien.prixEnfant, enfantTexte: lien.enfantTexte, depot: L.DEPOSIT, soldeTexte: lien.solde ? lien.solde.texte : '' });
   }
   if (req.method !== 'POST') { res.setHeader('Allow', 'GET, POST'); return L.json(res, 405, { ok: false }); }
   const b = await L.readJson(req);
@@ -66,7 +66,7 @@ module.exports = async (req, res) => {
       // Facture d'acompte générée par Stripe et envoyée au client avec son reçu
       invoice_creation: { enabled: true, invoice_data: {
         description: `Facture d'acompte (30 %) : ${ev.titre}, ${L.dateFr(ev.date)}, ${places} place${places > 1 ? 's' : ''}${enfants ? ` dont ${enfants} enfant${enfants > 1 ? 's' : ''}` : ''}`,
-        footer: `Acompte de 30 % sur un total de ${L.euro(total)} TTC. Solde de ${L.euro(total - acompte)} à régler sur place le soir de la soirée.`,
+        footer: `Acompte de 30 % sur un total de ${L.euro(total)} TTC. Solde de ${L.euro(total - acompte)} ${lien && lien.solde ? lien.solde.texte : 'à régler sur place le soir de la soirée'}.`,
         metadata: { event_id: ev.id, places: String(places) },
       } },
       success_url: `${site}/merci.html?type=soiree&session_id={CHECKOUT_SESSION_ID}`,

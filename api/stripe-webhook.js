@@ -25,13 +25,31 @@ module.exports = async (req, res) => {
   const s = event.data.object;
   if (s.payment_status !== 'paid') return L.json(res, 200, { ok: true, unpaid: true });
   const m = s.metadata || {};
+
+  // Paiement du solde (lien solde.html) : acomptes marqués soldés, Sheet, e-mails.
+  if (m.type === 'solde') {
+    const evS = L.soiree(m.solde_event) || { titre: m.solde_event, date: '', heure: '' };
+    const montant = (s.amount_total || 0) / 100;
+    for (const id of String(m.acomptes || '').split(',').filter(Boolean)) {
+      try { await L.stripe('POST', '/payment_intents/' + id, { metadata: { solde_paye: 'oui', solde_session: s.id } }); } catch (e) { console.error('solde', id, e.message); }
+      await L.sheetPost({ action: 'solde', ref: id, montant: montant.toFixed(2).replace('.', ',') });
+    }
+    const lignesS = [['Soirée', evS.titre], ['Date', evS.date ? `${L.dateFr(evS.date)}${evS.heure ? ', ' + evS.heure : ''}` : ''], ['Solde payé', L.euro(montant)], ['Reste à payer', L.euro(0)]];
+    await Promise.all([
+      L.sendMail({ to: m.email || s.customer_details?.email, subject: `Votre réservation est réglée : ${evS.titre}`, replyTo: L.env('RESERVATION_EMAIL') || undefined,
+        html: L.mailHtml({ titre: 'Tout est réglé !', intro: `Bonjour ${L.esc((m.nom || '').split(' ')[0])}, nous avons bien reçu le solde. Votre réservation est entièrement payée.`, lignes: lignesS, bloc: L.INFOS_SECURITE, fin: 'Votre facture de solde est jointe à l\'e-mail de reçu Stripe. À très vite !' }) }),
+      L.sendMail({ to: L.env('RESERVATION_EMAIL'), subject: `Solde reçu : ${evS.titre} (${m.nom})`, replyTo: m.email,
+        html: L.mailHtml({ titre: 'Solde payé', intro: 'Un solde vient d\'être payé en ligne.', lignes: [...lignesS, ['Nom', m.nom], ['E-mail', m.email]] }) }),
+    ]);
+    return L.json(res, 200, { ok: true, solde: true });
+  }
   const ev = L.soiree(m.event_id) || { titre: m.event_id, date: m.event_date, heure: '', prix: 0 };
   const places = parseInt(m.places, 10) || 0;
   const paye = (s.amount_total || 0) / 100;
-  const solde = Math.max(0, L.totalResa(ev, m) - paye);
+  const solde = L.soldeRestant(ev, m, paye), enLigne = L.soldeEnLigne(ev.id);
   const lignes = [
     ['Soirée', ev.titre], ['Date', `${L.dateFr(ev.date)}${ev.heure ? ', ' + ev.heure : ''}`], ['Places', m.enfants ? `${places} (dont ${m.enfants} enfant${m.enfants > 1 ? 's' : ''})` : String(places)],
-    ['Acompte payé', L.euro(paye)], ['Solde à régler sur place', L.euro(solde)],
+    ['Acompte payé', L.euro(paye)], [L.soldeLibelle(ev.id), L.euro(solde)],
     m.plateaux ? ['Plateaux', m.plateaux] : null,
   ];
 
@@ -40,7 +58,7 @@ module.exports = async (req, res) => {
       to: m.email || s.customer_details?.email,
       subject: `Votre place est confirmée : ${ev.titre}`,
       replyTo: L.env('RESERVATION_EMAIL') || undefined,
-      html: L.mailHtml({ titre: 'C\'est réservé !', intro: `Bonjour ${L.esc(m.nom || '')}, nous avons bien reçu votre acompte. Votre place est confirmée.`, lignes, bloc: L.INFOS_SECURITE, fin: 'Le solde se règle sur place, le soir même. Pour toute question, répondez simplement à cet e-mail ou appelez-nous.' }),
+      html: L.mailHtml({ titre: 'C\'est réservé !', intro: `Bonjour ${L.esc(m.nom || '')}, nous avons bien reçu votre acompte. Votre place est confirmée.`, lignes, bloc: L.INFOS_SECURITE, fin: (enLigne ? `Le solde se règle ${enLigne.texte}, avec le lien que nous vous enverrons.` : 'Le solde se règle sur place, le soir même.') + ' Pour toute question, répondez simplement à cet e-mail ou appelez-nous.' }),
     }),
     L.sendMail({
       to: L.env('RESERVATION_EMAIL'),

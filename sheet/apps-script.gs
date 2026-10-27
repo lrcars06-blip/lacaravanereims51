@@ -59,6 +59,7 @@ function doPost(e) {
     if (d.action === 'annules') return json({ ok: true, refs: annules() });
     if (d.action === 'liste') return json({ ok: true, lignes: liste(d.event) });
     if (d.action === 'rembourse') return json({ ok: true, lignes: rembourse(d.ref, d.total, d.montant) });
+    if (d.action === 'solde') return json({ ok: true, lignes: solde(d.ref, d.montant) });
     const lignes = d.action === 'lot' ? (d.lignes || []) : [d];
     let ajoutees = 0;
     const refs = new Set(feuille().getRange('I:I').getValues().flat().filter(String));
@@ -127,6 +128,21 @@ function restantes(event, counts) {
 
 function annules() {
   return feuille().getDataRange().getValues().slice(1).filter((r) => r[6] === 'annulé' && r[8]).map((r) => String(r[8]));
+}
+
+// Solde payé en ligne : mention « Soldé » dans la colonne Paiement de la ligne de l'acompte.
+function solde(ref, montant) {
+  if (!ref) return 0;
+  const f = feuille(), vals = f.getRange(2, 1, Math.max(1, f.getLastRow() - 1), 9).getValues();
+  let n = 0;
+  vals.forEach((r, i) => {
+    if (String(r[8]) !== String(ref)) return;
+    const note = 'Soldé en ligne' + (montant ? ' (' + montant + ' €)' : '') + ' le ' + Utilities.formatDate(new Date(), 'Europe/Paris', 'dd/MM');
+    const p = String(r[7] || '');
+    if (p.indexOf('Soldé en ligne') < 0) f.getRange(i + 2, 8).setValue(p ? p + ' · ' + note : note);
+    n++;
+  });
+  return n;
 }
 
 // Remboursement Stripe : total → statut « annulé » ; partiel → mention dans la colonne Paiement.
