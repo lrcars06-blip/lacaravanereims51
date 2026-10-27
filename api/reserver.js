@@ -33,10 +33,10 @@ module.exports = async (req, res) => {
     intro = `Bonjour ${L.esc(prenom)}, la soirée est complète pour le moment. Nous vous recontactons dès qu'une place se libère.`;
     lignes = [['Soirée', ev.titre], ['Date', L.dateFr(ev.date)], ['Personnes', n]];
   } else if (f === 'pass' && ev) {
-    titre = 'Votre pass est réservé';
+    titre = ev.gratuit ? 'Votre table est réservée' : 'Votre pass est réservé';
     intro = `Bonjour ${L.esc(prenom)}, c'est noté, on vous attend !`;
-    lignes = [['Soirée', ev.titre], ['Date', `${L.dateFr(ev.date)}, ${ev.heure}`], ['Pass', `${n} × ${L.euro(ev.prix)}, à régler sur place`]];
-    fin = 'Le pass comprend l\'entrée et une consommation.';
+    lignes = [['Soirée', ev.titre], ['Date', `${L.dateFr(ev.date)}, ${ev.heure}`], ev.gratuit ? ['Personnes', `${n}, entrée gratuite`] : ['Pass', `${n} × ${L.euro(ev.prix)}, à régler sur place`]];
+    fin = ev.gratuit ? 'Entrée gratuite, les consommations se règlent sur place.' : 'Le pass comprend l\'entrée et une consommation.';
   } else {
     titre = 'Nous avons bien reçu votre demande';
     intro = `Bonjour ${L.esc(prenom)}, merci pour votre demande. Nous revenons vers vous très vite pour confirmer la date.`;

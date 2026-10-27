@@ -47,6 +47,62 @@ module.exports = { DEPOSIT: 0.3, SOIREES: [
     "attente": false
   },
   {
+    "id": "back-to-the-80-2026-11-10",
+    "type": "pass",
+    "titre": "Back to the 80, Act III",
+    "date": "2026-11-10",
+    "heure": "de 19h30 à 2h",
+    "prix": 10,
+    "places": 160,
+    "reservees": 0,
+    "complet": false
+  },
+  {
+    "id": "nouba-2026-11-13",
+    "type": "pass",
+    "titre": "La Caravane fait la Nouba",
+    "date": "2026-11-13",
+    "heure": "de 19h30 à 2h",
+    "prix": 10,
+    "places": 160,
+    "reservees": 0,
+    "complet": false
+  },
+  {
+    "id": "beaujolais-2026-11-19",
+    "type": "pass",
+    "gratuit": true,
+    "titre": "Soirée Beaujolais Nouveau",
+    "date": "2026-11-19",
+    "heure": "en soirée",
+    "prix": 0,
+    "places": 160,
+    "reservees": 0,
+    "complet": false
+  },
+  {
+    "id": "big-fiesta-2026-11-20",
+    "type": "repas",
+    "titre": "Big Fiesta, soirée concert",
+    "date": "2026-11-20",
+    "heure": "de 19h30 à 2h",
+    "prix": 30,
+    "places": 160,
+    "reservees": 0,
+    "complet": false
+  },
+  {
+    "id": "johnny-blues-2026-11-27",
+    "type": "repas",
+    "titre": "Johnny Blues & Didier Darbon, soirée concert",
+    "date": "2026-11-27",
+    "heure": "de 19h30 à 2h",
+    "prix": 30,
+    "places": 160,
+    "reservees": 0,
+    "complet": false
+  },
+  {
     "id": "reveillon-2026-12-31",
     "type": "repas",
     "titre": "Réveillon du jour de l'an",

@@ -83,11 +83,11 @@ footer a{color:var(--cream)}
       $('#lead').textContent = 'Votre paiement a bien été transmis. Vous allez recevoir un e-mail de confirmation.';
     });
   } else if (type === 'pass') {
-    $('#t').textContent = 'Votre pass est réservé';
+    $('#t').textContent = q.get('gratuit') ? 'Votre table est réservée' : 'Votre pass est réservé';
     $('#lead').innerHTML = 'Merci' + prenom + ', c\'est noté : on vous attend ! Un e-mail de confirmation vous a été envoyé.';
     var n = +q.get('n') || 1, prix = +q.get('prix') || 0;
     $('#body').innerHTML = rows([['Soirée', q.get('soiree')], ['Date', dateFr(q.get('date'))], ['Pass', n + (prix ? ' × ' + euro(prix) : '')], prix ? ['À régler sur place', euro(n * prix), true] : null]) +
-      '<p class="note">Le pass comprend l\'entrée et une consommation. Il se règle sur place, le soir même.</p>';
+      '<p class="note">' + (q.get('gratuit') ? 'Entrée gratuite : votre table est notée, les consommations se règlent sur place.' : 'Le pass comprend l\'entrée et une consommation. Il se règle sur place, le soir même.') + '</p>';
     addCal(q.get('soiree') || 'Soirée', q.get('date'));
   } else if (type === 'attente') {
     $('#t').textContent = 'Vous êtes sur la liste d\'attente';
