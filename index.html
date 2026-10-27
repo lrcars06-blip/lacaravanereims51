@@ -796,7 +796,8 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
     <div class="planches">
       <div>
         <h3>Planches à partager</h3>
-        <p class="pl-note">Pendant les soirées, à commander sur place. Prix TTC.</p>
+        <p class="pl-note">À commander à l'avance avec votre réservation, ou sur place pendant les soirées. Prix TTC.</p>
+        <a class="btn btn-ghost" href="#reserver" style="margin-top:14px">Ajouter à ma réservation</a>
       </div>
       <ul class="planches-list">
         <li><span>Planche de charcuterie</span><b>18 €</b></li>
@@ -845,7 +846,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
       <p class="f full form-note" id="passNote" hidden></p>
       <p class="f full form-note" id="waitNote" hidden>Cette soirée est complète. Votre demande vous inscrit sur la liste d'attente : nous vous recontactons en cas d'annulation.</p>
       <fieldset class="f full" id="plateauxField">
-        <legend>Plateaux à partager <span class="opt-tag">facultatif, commande 48 h à l'avance</span></legend>
+        <legend>Plateaux et planches à partager <span class="opt-tag">facultatif, plateaux 48 h à l'avance</span></legend>
         <div class="plateaux-pick" id="plateauxPick"></div>
         <span class="err" id="plWarn"></span>
       </fieldset>
@@ -1141,7 +1142,11 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
     { id: 'amuse', nom: 'Plateau amuse-bouches salés', prix: 28, pieces: 20, affiche: '',
       items: ['Toast beurre truffé et jambon cru', 'Toast crevettes et chorizo', 'Brochettes de charcuterie', 'Wrap de légumes', 'Wrap saumon avocat', 'Mini burger poulet, sauce oignons-poivrons', 'Toast jambon de Reims, concassé de tomate', 'Mini burger rôti de bœuf', 'Navettes au saumon'] },
     { id: 'sucre', nom: 'Plateau mignardises sucrées', prix: 24, pieces: 20, affiche: '',
-      items: ['Mini cheesecake au biscuit rose de Reims', 'Mini brownie caramel', 'Financier framboise', 'Tartelette praliné', 'Tartelette citron', 'Choux chocolat', 'Mini tarte tatin', 'Mini pastel de nata'] }
+      items: ['Mini cheesecake au biscuit rose de Reims', 'Mini brownie caramel', 'Financier framboise', 'Tartelette praliné', 'Tartelette citron', 'Choux chocolat', 'Mini tarte tatin', 'Mini pastel de nata'] },
+    /* PLANCHES : à l'unité (planche: true), affichées dans le bloc « Planches à partager », commandables avec la réservation. */
+    { id: 'pl-charcuterie', nom: 'Planche de charcuterie', prix: 18, pieces: 1, planche: true },
+    { id: 'pl-fromages', nom: 'Planche de fromages', prix: 18, pieces: 1, planche: true },
+    { id: 'pl-mixte', nom: 'Planche mixte, charcuterie et fromages', prix: 18, pieces: 1, planche: true }
   ];
   var PLATEAU_DELAI_H = 48;
   var PLATEAU_SMS = '06 11 68 26 98';
@@ -1595,8 +1600,9 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
   /* ---------- Plateaux ---------- */
   var plq = {};
   function pxTxt(p) { return p.prix == null ? 'Prix sur demande' : [1, 2, 3].map(function (k) { return k * p.pieces + ' pièces : ' + euro(k * p.prix); }).join(' · '); }
-  function pxCourt(p) { return p.prix == null ? 'Prix sur demande' : euro(p.prix) + ' les ' + p.pieces + ' pièces'; }
-  $('#plGrid').innerHTML = PLATEAUX.map(function (p) {
+  function pxCourt(p) { return p.prix == null ? 'Prix sur demande' : p.planche ? euro(p.prix) + ' la planche' : euro(p.prix) + ' les ' + p.pieces + ' pièces'; }
+  function plQte(p, n) { return p.planche ? n + ' planche' + (n > 1 ? 's' : '') : n * p.pieces + ' pièces'; }
+  $('#plGrid').innerHTML = PLATEAUX.filter(function (p) { return !p.planche; }).map(function (p) {
     return '<article class="pl-card' + (p.affiche ? '' : ' pl-noimg') + '">' + (p.affiche ? '<button class="ev-poster" type="button" data-plposter="' + p.id + '" aria-label="Voir l\'affiche : ' + esc(p.nom) + '"><img loading="lazy" src="' + p.affiche + '" alt=""></button>' : '') +
       '<div><h3>' + esc(p.nom) + '</h3><ul>' + p.items.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>' +
       (p.prix == null ? '<p class="pl-price">Prix sur demande</p>' : '<ul class="pl-tarifs">' + [1, 2, 3].map(function (k) { return '<li><span>' + k * p.pieces + ' pièces</span><b>' + euro(k * p.prix) + '</b></li>'; }).join('') + '</ul>') + '<p class="pl-note">Prix TTC. Au-delà de ' + 3 * p.pieces + ' pièces : tarif sur demande. Commande ' + PLATEAU_DELAI_H + ' h à l\'avance, à emporter ou à déguster sur place lors des soirées.</p>' +
@@ -1659,22 +1665,22 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
   $('#plateauxPick').innerHTML = PLATEAUX.map(function (p) {
     plq[p.id] = 0;
     return '<div class="pick"><span><b>' + esc(p.nom) + '</b><small id="plx-' + p.id + '">' + pxCourt(p) + '</small></span>' +
-      '<div class="stepper" role="group" aria-label="' + esc(p.nom) + '"><button type="button" data-pl="' + p.id + '" data-d="-1" aria-label="20 pièces de moins">−</button><output id="pl-' + p.id + '">0</output><button type="button" data-pl="' + p.id + '" data-d="1" aria-label="20 pièces de plus">+</button></div></div>';
+      '<div class="stepper" role="group" aria-label="' + esc(p.nom) + '"><button type="button" data-pl="' + p.id + '" data-d="-1" aria-label="' + (p.planche ? '1 planche' : p.pieces + ' pièces') + ' de moins">−</button><output id="pl-' + p.id + '">0</output><button type="button" data-pl="' + p.id + '" data-d="1" aria-label="' + (p.planche ? '1 planche' : p.pieces + ' pièces') + ' de plus">+</button></div></div>';
   }).join('');
   $('#plateauxPick').addEventListener('click', function (e) {
     var b = e.target.closest('button[data-pl]'); if (!b) return;
     var id = b.dataset.pl, p = PLATEAUX.filter(function (x) { return x.id === id; })[0];
     plq[id] = Math.max(0, Math.min(20, plq[id] + +b.dataset.d));
     $('#pl-' + id).textContent = plq[id];
-    $('#plx-' + id).textContent = plq[id] ? plq[id] * p.pieces + ' pièces' + (p.prix != null ? ' · ' + euro(plq[id] * p.prix) + (plq[id] > 3 ? ', tarif confirmé sur devis' : '') : '') : pxCourt(p);
+    $('#plx-' + id).textContent = plq[id] ? plQte(p, plq[id]) + (p.prix != null ? ' · ' + euro(plq[id] * p.prix) + (!p.planche && plq[id] > 3 ? ', tarif confirmé sur devis' : '') : '') : pxCourt(p);
     checkPlateaux();
   });
   function plateauxTotal() { return PLATEAUX.reduce(function (n, p) { return n + plq[p.id]; }, 0); }
   function plateauxTxt() {
-    return PLATEAUX.filter(function (p) { return plq[p.id] > 0; }).map(function (p) { return p.nom.replace('Plateau ', '') + ' : ' + plq[p.id] * p.pieces + ' pièces' + (p.prix != null ? ' (' + euro(p.prix * plq[p.id]) + ' TTC)' : ''); }).join(', ');
+    return PLATEAUX.filter(function (p) { return plq[p.id] > 0; }).map(function (p) { return p.nom.replace('Plateau ', '') + ' : ' + plQte(p, plq[p.id]) + (p.prix != null ? ' (' + euro(p.prix * plq[p.id]) + ' TTC)' : ''); }).join(', ');
   }
   function plateauxTooLate() {
-    var v = $('#date').value; if (!v || !plateauxTotal()) return false;
+    var v = $('#date').value; if (!v || !PLATEAUX.some(function (p) { return !p.planche && plq[p.id] > 0; })) return false;
     return new Date(v + 'T19:00:00') - new Date() < PLATEAU_DELAI_H * 3600 * 1000;
   }
   function checkPlateaux() { $('#plWarn').textContent = plateauxTooLate() ? 'Les plateaux se commandent ' + PLATEAU_DELAI_H + ' h à l\'avance : pour cette date, envoyez-nous un SMS au ' + PLATEAU_SMS + '.' : ''; }
