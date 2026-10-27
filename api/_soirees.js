@@ -2,17 +2,6 @@
 // Prix, capacité et statut « complet » utilisés par le paiement en ligne.
 module.exports = { DEPOSIT: 0.3, SOIREES: [
   {
-    "id": "test-paiement-2026-10-26",
-    "type": "repas",
-    "titre": "TEST paiement (à supprimer)",
-    "date": "2026-10-26",
-    "heure": "test",
-    "prix": 5,
-    "places": 10,
-    "reservees": 0,
-    "complet": false
-  },
-  {
     "id": "caravane-en-fete-2026-10-23",
     "type": "pass",
     "titre": "La Caravane en fête",
