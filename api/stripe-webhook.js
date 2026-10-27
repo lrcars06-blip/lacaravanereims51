@@ -10,6 +10,16 @@ module.exports = async (req, res) => {
 
   let event;
   try { event = JSON.parse(raw); } catch { return L.json(res, 400, { ok: false }); }
+  // Remboursement (fait par Vincent dans Stripe) : mise à jour du Sheet → place libérée, sortie du compte rendu et du rappel.
+  if (event.type === 'charge.refunded') {
+    const c = event.data.object;
+    if (c.payment_intent) {
+      const total = !!c.refunded || (c.amount_refunded || 0) >= (c.amount || 0);
+      const r = await L.sheetPost({ action: 'rembourse', ref: c.payment_intent, total, montant: ((c.amount_refunded || 0) / 100).toFixed(2).replace('.', ',') });
+      return L.json(res, 200, { ok: true, refund: true, lignes: r && r.lignes });
+    }
+    return L.json(res, 200, { ok: true, refund: true });
+  }
   if (event.type !== 'checkout.session.completed') return L.json(res, 200, { ok: true, ignored: event.type });
 
   const s = event.data.object;

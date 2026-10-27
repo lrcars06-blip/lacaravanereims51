@@ -18,6 +18,7 @@
 - Compte Google de La Caravane. Script : `sheet/apps-script.gs` (copie de référence de Extensions > Apps Script).
 - Chaque pass, liste d'attente et acompte payé y est inscrit automatiquement (réf Stripe en colonne I).
 - Onglet `Soirees` : capacité, réservées (statut « confirmé ») et restantes, par soirée (ajoutée automatiquement).
+- Remboursement total dans Stripe : la ligne passe automatiquement en « annulé » (webhook charge.refunded) ; remboursement partiel : noté dans la colonne Paiement, la ligne reste confirmée.
 - Annuler : passer le Statut à « annulé » (ne pas supprimer la ligne). La place se libère sur le site (jauge et paiement),
   la réservation sort du compte rendu et du rappel. Un acompte annulé se rembourse à part dans Stripe.
 - Réservation prise par téléphone : ajouter une ligne à la main (Soirée = id de la soirée, Statut = confirmé), elle compte dans la jauge.
