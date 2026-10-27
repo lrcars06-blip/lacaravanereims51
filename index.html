@@ -1523,11 +1523,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
           '<span class="total">' + n + ' × ' + euro(e.prix) + ' = ' + euro(n * e.prix) + '<br>' + (e.surPlace ? 'Réglé sur place, le soir même' : 'Acompte 30 % : <b>' + euro(Math.round(n * e.prix * DEPOSIT)) + '</b>') + '</span>' +
           '<a class="btn btn-main" href="#reserver" data-book="' + e.id + '" data-kind="soiree">Réserver ' + n + ' place' + (n > 1 ? 's' : '') + '</a>';
       }
-      var seats = '';
-      if (!full && !e.gratuit) {
-        var pct = Math.min(100, Math.round((e.reservees || 0) / evCap(e) * 100));
-        seats = '<div class="ev-seats"><div class="bar"><i class="' + (left <= 20 ? 'warn' : '') + '" style="width:' + pct + '%"></i></div><p>' + (left <= 20 ? '<b>Plus que ' + left + ' place' + (left > 1 ? 's' : '') + '</b>' : '<b>' + left + ' places disponibles</b>') + ' sur ' + evCap(e) + '.</p></div>';
-      }
+      var seats = ''; /* Nombre de places restantes volontairement non affiché (le plafond reste contrôlé par le serveur). */
       return '<article class="event" id="ev-' + e.id + '">' +
         '<button class="ev-poster" type="button" data-poster="' + e.id + '" aria-label="Voir l\'affiche : ' + esc(e.titre) + '"><img loading="lazy" src="' + e.affiche + '" alt=""></button>' +
         '<div class="ev-body"><p class="ev-when">' + d.court + ', ' + e.heure + '</p><h3>' + esc(e.titre) + '</h3><p>' + esc(e.texte) + '</p>' + tags(e) +
@@ -1538,7 +1534,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
   }
   $('#events').addEventListener('click', function (e) {
     var b = e.target.closest('button[data-ev]');
-    if (b) { var ev = evById(b.dataset.ev); var c = qty[ev.id] || Math.min(2, evLeft(ev)); qty[ev.id] = Math.max(1, Math.min(evLeft(ev), 20, c + +b.dataset.d)); renderEvents(); return; }
+    if (b) { var ev = evById(b.dataset.ev); var c = qty[ev.id] || Math.min(2, evLeft(ev)); qty[ev.id] = Math.max(1, Math.min(20, c + +b.dataset.d)); renderEvents(); return; }
     var pz = e.target.closest('[data-poster]'); if (pz) { var pe = evById(pz.dataset.poster); openPoster(pe.affiche, pe.titre); return; }
     var a = e.target.closest('[data-book]'); if (a) bookEvent(a.dataset.book, a.dataset.kind);
   });
@@ -1679,7 +1675,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
     $('#date').readOnly = !!ev; if (ev) $('#date').value = ev.date;
     $('label[for=fGuests]').textContent = pass && !(ev && ev.gratuit) ? 'Nombre de pass' : wait ? 'Nombre de personnes' : 'Nombre d\'invités';
     $('#fGuests').min = f === 'conviv' ? MIN_CONVIV : 1;
-    $('#fGuests').max = ev && !wait && soiree ? Math.max(1, evLeft(ev)) : ev ? 20 : MAX;
+    $('#fGuests').max = ev ? 20 : MAX;
     var g = +$('#fGuests').value || 0;
     $('#acompteAmount').textContent = soiree && ev && !wait && !ev.surPlace ? 'Soit ' + euro(Math.round(g * ev.prix * DEPOSIT * 100) / 100) + ' pour ' + g + ' place' + (g > 1 ? 's' : '') + ' à ' + euro(ev.prix) + '.' : '';
 
@@ -1782,13 +1778,13 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
       /* Soirée repas : paiement de l'acompte sur Stripe */
       post(CHECKOUT_ENDPOINT).then(function (j) {
         if (j.httpOk && j.url) { window.location.href = j.url; return; }
-        if (j.error === 'complet') { ev.reservees = evCap(ev); renderEvents(); renderCal(); syncForm(); fail2(j.restant ? 'Il ne reste que ' + j.restant + ' place' + (j.restant > 1 ? 's' : '') + ' pour cette soirée.' : 'Cette soirée vient d\'être complète. Vous pouvez rejoindre la liste d\'attente.'); return; }
+        if (j.error === 'complet') { if (!j.restant) { ev.reservees = evCap(ev); renderEvents(); renderCal(); syncForm(); } fail2(j.restant ? 'Il n\'y a plus assez de places pour ce nombre de personnes. Réduisez le nombre, ou appelez-nous au 03 26 07 59 10.' : 'Cette soirée vient d\'être complète. Vous pouvez rejoindre la liste d\'attente.'); return; }
         fail2();
       }).catch(function () { fail2(); });
       return;
     }
     post(FORM_ENDPOINT).then(function (j) {
-      if (j.error === 'complet') { ev.reservees = evCap(ev) - (j.restant || 0); renderEvents(); renderCal(); syncForm(); fail2(j.restant ? 'Il ne reste que ' + j.restant + ' place' + (j.restant > 1 ? 's' : '') + ' pour cette soirée.' : 'Cette soirée vient d\'être complète. Vous pouvez rejoindre la liste d\'attente.'); return; }
+      if (j.error === 'complet') { if (!j.restant) { ev.reservees = evCap(ev); renderEvents(); renderCal(); syncForm(); } fail2(j.restant ? 'Il n\'y a plus assez de places pour ce nombre de personnes. Réduisez le nombre, ou appelez-nous au 03 26 07 59 10.' : 'Cette soirée vient d\'être complète. Vous pouvez rejoindre la liste d\'attente.'); return; }
       if (!j.httpOk) throw 0;
       var place = f === 'soiree' && ev && ev.surPlace && !wait;
       var q = new URLSearchParams({ type: wait ? 'attente' : f === 'pass' ? 'pass' : place ? 'place' : 'demande', prenom: $('#prenom').value.trim() });

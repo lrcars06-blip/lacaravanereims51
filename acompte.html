@@ -115,7 +115,7 @@ input:focus-visible{outline:3px solid var(--bulb);outline-offset:1px;border-colo
     fetch('api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ soiree: s, cle: k, nom: f.nom.value, email: f.email.value, telephone: f.telephone.value, invites: a, enfants: en, botcheck: f.botcheck.value }) })
       .then(function (r) { return r.json(); }).then(function (j) {
         if (j.ok && j.url) { location.href = j.url; return; }
-        if (j.error === 'complet') { $('#err').textContent = j.restant ? 'Il ne reste que ' + j.restant + ' place' + (j.restant > 1 ? 's' : '') + ' à confirmer pour cette soirée. Appelez-nous au 03 26 07 59 10.' : 'Toutes les places de cette soirée sont déjà confirmées. Appelez-nous au 03 26 07 59 10.'; $('#go').disabled = false; $('#go').textContent = 'Payer l\'acompte'; return; }
+        if (j.error === 'complet') { $('#err').textContent = j.restant ? 'Il n\'y a plus assez de places pour ce nombre de personnes. Appelez-nous au 03 26 07 59 10.' : 'Toutes les places de cette soirée sont déjà confirmées. Appelez-nous au 03 26 07 59 10.'; $('#go').disabled = false; $('#go').textContent = 'Payer l\'acompte'; return; }
         throw 0;
       }).catch(function () { $('#err').textContent = 'Le paiement n\'a pas pu démarrer. Réessayez ou appelez-nous au 03 26 07 59 10.'; $('#go').disabled = false; $('#go').textContent = 'Payer l\'acompte'; });
   });
