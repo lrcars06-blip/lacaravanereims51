@@ -43,7 +43,8 @@ module.exports = { DEPOSIT: 0.3, SOIREES: [
     "prix": 10,
     "places": 160,
     "reservees": 160,
-    "complet": true
+    "complet": true,
+    "attente": false
   },
   {
     "id": "reveillon-2026-12-31",

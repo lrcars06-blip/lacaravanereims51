@@ -16,6 +16,10 @@ module.exports = async (req, res) => {
   const jour = /^\d{4}-\d{2}-\d{2}$/.test(String(b.date || '')) ? new Date(b.date + 'T12:00:00').getDay() : -1;
   if (L.clean(b.formule, 20) === 'conviv' && jour >= 1 && jour <= 4 && !L.SOIREES.some((s) => s.date === b.date)) return L.json(res, 400, { ok: false, error: 'ferme' });
 
+  // Soirée complète sans liste d'attente : aucune inscription acceptée.
+  const evAsk = L.soiree(L.clean(b.soiree, 120));
+  if (b.attente && evAsk && evAsk.attente === false) return L.json(res, 409, { ok: false, error: 'complet', restant: 0 });
+
   // 1. La demande, pour La Caravane (répondre = écrire au client)
   const interne = await L.sendMail({ to: L.env('RESERVATION_EMAIL'), subject, text: message, replyTo: email });
   if (!interne.ok) return L.json(res, 502, { ok: false });
