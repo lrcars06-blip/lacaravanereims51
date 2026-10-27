@@ -42,8 +42,8 @@ module.exports = { DEPOSIT: 0.3, SOIREES: [
     "heure": "de 19h30 à 2h",
     "prix": 10,
     "places": 160,
-    "reservees": 0,
-    "complet": false
+    "reservees": 160,
+    "complet": true
   },
   {
     "id": "reveillon-2026-12-31",

@@ -343,6 +343,14 @@ dialog.box::backdrop{background:rgba(6,4,16,.94)}
 .pl-tarifs span{font-size:.85rem;color:var(--cream-dim)}
 .pl-tarifs b{font-family:var(--display);font-weight:400;font-size:1.45rem;color:var(--bulb)}
 .pl-note{font-size:.9rem;color:var(--cream-dim);margin-top:6px}
+.planches{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:20px;align-items:center;margin-top:18px;padding:20px;border-radius:var(--r-m);background:var(--night-2);border:1px solid var(--line)}
+.planches h3{font-size:clamp(1.4rem,2.2vw,1.8rem);margin:0}
+.planches-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.planches-list li{display:grid;gap:4px;align-content:space-between;padding:12px 10px;border-radius:12px;background:rgba(255,200,61,.08);border:1px solid rgba(255,200,61,.25);text-align:center}
+.planches-list span{font-size:.92rem;color:var(--cream)}
+.planches-list b{font-family:var(--display);font-weight:400;font-size:1.45rem;color:var(--bulb)}
+@media (max-width:760px){.planches{grid-template-columns:1fr}}
+@media (max-width:420px){.planches-list{grid-template-columns:1fr}.planches-list li{grid-template-columns:1fr auto;text-align:left;align-items:center}}
 /* Formulaire : plateaux, notes */
 .plateaux-pick{display:grid;gap:10px}
 .pick{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 16px;border-radius:var(--r-s);background:#fff;border:2px solid rgba(29,19,56,.12)}
@@ -782,9 +790,20 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
   <div class="wrap">
     <div class="band-head">
       <h2>Plateaux à partager</h2>
-      <p>Amuse-bouches salés et mignardises sucrées, préparés pour votre soirée ou votre événement. Commande 48 h à l'avance, directement avec votre réservation.</p>
+      <p>Amuse-bouches salés et mignardises sucrées, préparés pour votre soirée ou votre événement. Commande 48 h à l'avance, directement avec votre réservation. Et pendant les soirées, nos planches à partager.</p>
     </div>
     <div class="pl-grid" id="plGrid"></div>
+    <div class="planches">
+      <div>
+        <h3>Planches à partager</h3>
+        <p class="pl-note">Pendant les soirées, à commander sur place. Prix TTC.</p>
+      </div>
+      <ul class="planches-list">
+        <li><span>Planche de charcuterie</span><b>18 €</b></li>
+        <li><span>Planche de fromages</span><b>18 €</b></li>
+        <li><span>Planche mixte, charcuterie et fromages</span><b>18 €</b></li>
+      </ul>
+    </div>
   </div>
 </section>
 
@@ -1110,7 +1129,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
       affiche: 'affiche-halloween-repas.jpg', infos: ['DJ Chris', 'Cocktail', 'Buffet froid et desserts', 'Dress code : déguisé'] },
     { id: 'celibataires-2026-11-06', type: 'pass', titre: 'Soirée célibataires', date: '2026-11-06', heure: 'de 19h30 à 2h',
       texte: 'Des bracelets de couleur pour briser la glace. Rouge : à la recherche de l\'amour. Vert : pour l\'amitié. Jaune : ouvert(e) à la discussion. Bleu : juste là pour danser. Planches de charcuterie mixte ou fromage. Réservation de table conseillée.',
-      prix: 10, prixTexte: 'le pass, 1 consommation offerte', places: 160, reservees: 0, complet: false, table: true,
+      prix: 10, prixTexte: 'le pass, 1 consommation offerte', places: 160, reservees: 160, complet: true, table: true,
       affiche: 'affiche-celibataires.jpg', infos: ['DJ Baloo', 'Bracelets de couleur', 'Planches charcuterie ou fromage', 'Ouverte à tous'] },
     { id: 'reveillon-2026-12-31', type: 'repas', titre: 'Réveillon du jour de l\'an', date: '2026-12-31', heure: 'de 20h à 5h du matin',
       texte: 'Menu de réveillon, dont dos de cabillaud sauce champagne ou plat au canard et gratin dauphinois truffé, plateau de fromage, bûche rémoise aux biscuits roses de Reims. Menu enfant jusqu\'à 15 ans : 30 €.',
