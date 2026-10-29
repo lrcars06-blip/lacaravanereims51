@@ -91,7 +91,7 @@ module.exports = { DEPOSIT: 0.3, SOIREES: [
     "heure": "de 19h30 à 2h",
     "prix": 30,
     "places": 160,
-    "reservees": 129,
+    "reservees": 142,
     "complet": false,
     "surPlace": true
   },
