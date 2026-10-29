@@ -21,7 +21,8 @@ module.exports = { DEPOSIT: 0.3, SOIREES: [
     "prix": 10,
     "places": 160,
     "reservees": 143,
-    "complet": false
+    "complet": true,
+    "attente": false
   },
   {
     "id": "halloween-repas-2026-10-31",
@@ -32,7 +33,8 @@ module.exports = { DEPOSIT: 0.3, SOIREES: [
     "prix": 35,
     "places": 160,
     "reservees": 160,
-    "complet": true
+    "complet": true,
+    "attente": false
   },
   {
     "id": "celibataires-2026-11-06",
@@ -55,7 +57,8 @@ module.exports = { DEPOSIT: 0.3, SOIREES: [
     "prix": 10,
     "places": 160,
     "reservees": 137,
-    "complet": false
+    "complet": true,
+    "attente": false
   },
   {
     "id": "nouba-2026-11-13",

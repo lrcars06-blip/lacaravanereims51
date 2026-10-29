@@ -47,7 +47,7 @@ async function compteRendu(ev) {
     const pass = all.filter((r) => r.f === 'pass' || r.f === 'surplace'), attente = all.filter((r) => r.f === 'attente');
     nbPers = pass.reduce((t, r) => t + r.pers, 0);
     lignes.push([ev.surPlace ? 'Places réservées en ligne' : 'Pass réservés en ligne', String(nbPers)], ['À encaisser sur place', L.euro(nbPers * ev.prix)]);
-    if (ev.reservees && !ev.complet) lignes.push(['Réservations prises hors site (téléphone, réseaux)', `${ev.reservees} personnes, à pointer sur votre liste`]);
+    if (ev.reservees && !(ev.complet && ev.reservees >= (ev.places || 160))) lignes.push(['Réservations prises hors site (téléphone, réseaux)', `${ev.reservees} personnes, à pointer sur votre liste`]);
     bloc = liste('Réservations', pass, false);
     if (attente.length) bloc += liste('Liste d\'attente', attente, false);
   }
@@ -62,9 +62,10 @@ async function compteRendu(ev) {
   }
   // Réservations prises hors site (téléphone, réseaux), saisies dans la configuration de la soirée.
   // Soirée complète : le chiffre de la salle inclut déjà tout le monde, on affiche la capacité.
-  if (ev.complet) lignes.push(['TOTAL attendu', `Complet : ${ev.places} personnes`]);
+  const plein = ev.complet && (ev.reservees || 0) >= (ev.places || 160);
+  if (plein) lignes.push(['TOTAL attendu', `Complet : ${ev.places} personnes`]);
   else { nbPers += ev.reservees || 0; lignes.push(['TOTAL attendu', `${nbPers} personne${nbPers > 1 ? 's' : ''}`]); }
-  subject = ev.complet ? `Demain : ${ev.titre}, complet (${ev.places} personnes)` : `Demain : ${ev.titre}, ${nbPers} personne${nbPers > 1 ? 's' : ''} réservée${nbPers > 1 ? 's' : ''}`;
+  subject = plein ? `Demain : ${ev.titre}, complet (${ev.places} personnes)` : `Demain : ${ev.titre}, ${nbPers} personne${nbPers > 1 ? 's' : ''} réservée${nbPers > 1 ? 's' : ''}`;
 
   return L.sendMail({
     to: L.env('RESERVATION_EMAIL'),
