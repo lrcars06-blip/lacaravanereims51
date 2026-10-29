@@ -4,5 +4,5 @@ const { SOIREES } = require('./_soirees');
 module.exports = (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  res.end(JSON.stringify({ soirees: SOIREES.map((s) => ({ id: s.id, titre: s.titre, date: s.date, places: s.complet ? Math.min(s.places || 160, 160) : Math.max(0, Math.min(s.places || 160, 160) - (s.reservees || 0)) })) }));
+  res.end(JSON.stringify({ soirees: SOIREES.map((s) => ({ id: s.id, titre: s.titre, date: s.date, places: s.complet && (s.reservees || 0) >= (s.places || 160) ? Math.min(s.places || 160, 160) : Math.max(0, Math.min(s.places || 160, 160) - (s.reservees || 0)) })) }));
 };
