@@ -24,6 +24,8 @@ module.exports = async (req, res) => {
   // Réservations pas encore ouvertes pour cette soirée (champ « ouverture »).
   const aujourdhui = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
   if (evAsk && evAsk.ouverture && aujourdhui < evAsk.ouverture) return L.json(res, 409, { ok: false, error: 'pas_ouvert' });
+  // Soirée choisie et date envoyée doivent correspondre (sinon la réservation partirait sur la mauvaise soirée).
+  if (evAsk && b.date && b.date !== evAsk.date) return L.json(res, 400, { ok: false, error: 'date_soiree' });
   if (b.attente && evAsk && evAsk.attente === false) return L.json(res, 409, { ok: false, error: 'complet', restant: 0 });
   // Places : pass et soirée repas « sur place » limités à la capacité (réservations déjà prises + inscrites dans le Sheet).
   const fAsk = L.clean(b.formule, 20), nAsk = parseInt(b.invites, 10) || 0;

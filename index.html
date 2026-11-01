@@ -1718,7 +1718,19 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
     return new Date(v + 'T19:00:00') - new Date() < PLATEAU_DELAI_H * 3600 * 1000;
   }
   function checkPlateaux() { $('#plWarn').textContent = plateauxTooLate() ? 'Les plateaux se commandent ' + PLATEAU_DELAI_H + ' h à l\'avance : pour cette date, envoyez-nous un SMS au ' + PLATEAU_SMS + '.' : ''; }
-  $('#date').addEventListener('change', function () { checkPlateaux(); var m = RULES.date($('#date').value); if (m && (samediPrive($('#date').value) || m === FERME_PUBLIC_MSG)) fail('date', m); else if (!m) fail('date', ''); });
+  $('#date').addEventListener('change', function () {
+    var fk = fFormule();
+    if (fk === 'pass' || fk === 'soiree') {
+      var dv = $('#date').value, ce = UPCOMING.filter(function (x) { return x.date === dv; })[0], cur = fEvent();
+      if (cur && dv !== cur.date) {
+        if (ce && ce.type !== (fk === 'pass' ? 'pass' : 'repas')) { $$('input[name=fformule]').forEach(function (r) { r.checked = r.value === (ce.type === 'pass' ? 'pass' : 'soiree'); }); fk = ce.type === 'pass' ? 'pass' : 'soiree'; }
+        $('#fEvent').value = ce && !evAVenir(ce) ? ce.id : ''; syncForm();
+        if (!ce) { $('#date').value = cur.date; fail('date', 'Aucune soirée ce jour-là. Choisissez la soirée dans la liste, ou la formule Privatisation pour une autre date.'); return; }
+        if (evAVenir(ce)) { $('#date').value = cur.date; syncForm(); fail('date', ce.titre + ' : ' + evOuvTxt(ce).toLowerCase() + '.'); return; }
+        fail('date', ''); return;
+      }
+    }
+    checkPlateaux(); var m = RULES.date($('#date').value); if (m && (samediPrive($('#date').value) || m === FERME_PUBLIC_MSG)) fail('date', m); else if (!m) fail('date', ''); });
   form.addEventListener('change', function (e) {
     if (e.target.name === 'fformule' || e.target.id === 'fEvent' || e.target.id === 'fGuests') {
       if (e.target.name === 'fformule' && (e.target.value === 'exclu' || e.target.value === 'conviv')) { state.formule = e.target.value; render(); var md = $('#date').value && RULES.date($('#date').value); fail('date', md === FERME_PUBLIC_MSG ? md : ''); return; }
@@ -1747,7 +1759,8 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
   $('#ok').addEventListener('change', function () { if ($('#ok').checked) fail('ok', ''); });
 
   function body() {
-    var d = $('#date').value, dateFr = d ? new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : 'à définir';
+    var evB = (fFormule() === 'soiree' || fFormule() === 'pass') ? fEvent() : null;
+    var d = evB ? evB.date : $('#date').value, dateFr = d ? new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : 'à définir';
     var f = fFormule(), ev = (f === 'soiree' || f === 'pass') ? fEvent() : null, wait = !!(ev && evFull(ev)), g = $('#fGuests').value, opts = $$('input[name=opt]:checked', form).map(function (o) { return o.value; });
     var quoi = wait ? 'LISTE D\'ATTENTE : ' + ev.titre + ' (' + evDate(ev).long + '), ' + g + ' personne' + (g > 1 ? 's' : '')
       : f === 'pass' && ev && ev.gratuit ? 'Table, entrée gratuite : ' + ev.titre + ' (' + evDate(ev).long + '), ' + g + ' personne' + (g > 1 ? 's' : '')
@@ -1780,7 +1793,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
     var m = body(), f = fFormule(), ev = (f === 'soiree' || f === 'pass') ? fEvent() : null, wait = !!(ev && evFull(ev));
     var payload = {
       subject: m.subject, message: m.text, nom: $('#prenom').value.trim() + ' ' + $('#nom').value.trim(), email: $('#email').value.trim(), telephone: $('#tel').value.trim(),
-      date: $('#date').value, invites: $('#fGuests').value, occasion: occasion(), formule: f, menu: state.menu, soiree: $('#fEvent').value, attente: wait,
+      date: (function () { var e0 = (f === 'soiree' || f === 'pass') ? fEvent() : null; return e0 ? e0.date : $('#date').value; })(), invites: $('#fGuests').value, occasion: occasion(), formule: f, menu: state.menu, soiree: $('#fEvent').value, attente: wait,
       plateaux: plateauxTxt(), options: $$('input[name=opt]:checked', form).map(function (o) { return o.value; }).join(', '), precisions: $('#msg').value.trim(), botcheck: '' };
     var btn = $('#send'), label = btn.textContent; btn.disabled = true; btn.textContent = 'Un instant…';
     var fail2 = function (msg) { say(msg || 'La demande n\'est pas partie. Réessayez, ou appelez-nous au 03 26 07 59 10.'); btn.disabled = false; btn.textContent = label; };
@@ -1797,6 +1810,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
     }
     post(FORM_ENDPOINT).then(function (j) {
       if (j.error === 'pas_ouvert' && ev) { fail2(evOuvTxt(ev) + '.'); return; }
+      if (j.error === 'date_soiree') { fail2('La date ne correspond pas à la soirée choisie. Vérifiez la soirée dans la liste.'); return; }
       if (j.error === 'complet') { if (!j.restant) { ev.reservees = evCap(ev); renderEvents(); renderCal(); syncForm(); } fail2(j.restant ? 'Il n\'y a plus assez de places pour ce nombre de personnes. Réduisez le nombre, ou appelez-nous au 03 26 07 59 10.' : 'Cette soirée vient d\'être complète. Vous pouvez rejoindre la liste d\'attente.'); return; }
       if (!j.httpOk) throw 0;
       var place = f === 'soiree' && ev && ev.surPlace && !wait;
