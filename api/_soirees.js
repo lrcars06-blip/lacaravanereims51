@@ -37,18 +37,6 @@ module.exports = { DEPOSIT: 0.3, SOIREES: [
     "attente": false
   },
   {
-    "id": "celibataires-2026-11-06",
-    "type": "pass",
-    "titre": "Soirée célibataires",
-    "date": "2026-11-06",
-    "heure": "de 19h30 à 2h",
-    "prix": 10,
-    "places": 160,
-    "reservees": 160,
-    "complet": true,
-    "attente": false
-  },
-  {
     "id": "back-to-the-80-2026-11-10",
     "type": "pass",
     "titre": "Back to the 80, Act III",
@@ -74,14 +62,14 @@ module.exports = { DEPOSIT: 0.3, SOIREES: [
   {
     "id": "beaujolais-2026-11-19",
     "type": "pass",
-    "gratuit": true,
     "titre": "Soirée Beaujolais Nouveau",
     "date": "2026-11-19",
     "heure": "en soirée",
     "prix": 0,
     "places": 160,
     "reservees": 0,
-    "complet": false
+    "complet": false,
+    "gratuit": true
   },
   {
     "id": "big-fiesta-2026-11-20",
@@ -106,6 +94,18 @@ module.exports = { DEPOSIT: 0.3, SOIREES: [
     "reservees": 75,
     "complet": false,
     "surPlace": true
+  },
+  {
+    "id": "celibataires-2026-12-04",
+    "type": "pass",
+    "titre": "Soirée célibataires",
+    "date": "2026-12-04",
+    "heure": "de 19h30 à 2h",
+    "prix": 10,
+    "places": 160,
+    "reservees": 0,
+    "complet": false,
+    "ouverture": "2026-11-03"
   },
   {
     "id": "reveillon-2026-12-31",

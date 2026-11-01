@@ -1,6 +1,8 @@
 // Demandes sans paiement en ligne : pass soirée, soirée repas réglée sur place, liste d'attente, privatisation, Convivialité.
 // Envoie la demande à La Caravane et un accusé de réception au client.
 const L = require('./_lib');
+// Fermetures exceptionnelles au public (même liste que FERMETURES dans index.html).
+const FERMETURES = ['2026-11-06'];
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') { res.setHeader('Allow', 'POST'); return L.json(res, 405, { ok: false }); }
@@ -15,9 +17,13 @@ module.exports = async (req, res) => {
   // Fermé au public du lundi au jeudi : seule la privatisation est possible ces jours-là (sauf soirée de l'agenda).
   const jour = /^\d{4}-\d{2}-\d{2}$/.test(String(b.date || '')) ? new Date(b.date + 'T12:00:00').getDay() : -1;
   if (L.clean(b.formule, 20) === 'conviv' && jour >= 1 && jour <= 4 && !L.SOIREES.some((s) => s.date === b.date)) return L.json(res, 400, { ok: false, error: 'ferme' });
+  if (L.clean(b.formule, 20) === 'conviv' && FERMETURES.includes(b.date)) return L.json(res, 400, { ok: false, error: 'ferme' });
 
   // Soirée complète sans liste d'attente : aucune inscription acceptée.
   const evAsk = L.soiree(L.clean(b.soiree, 120));
+  // Réservations pas encore ouvertes pour cette soirée (champ « ouverture »).
+  const aujourdhui = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
+  if (evAsk && evAsk.ouverture && aujourdhui < evAsk.ouverture) return L.json(res, 409, { ok: false, error: 'pas_ouvert' });
   if (b.attente && evAsk && evAsk.attente === false) return L.json(res, 409, { ok: false, error: 'complet', restant: 0 });
   // Places : pass et soirée repas « sur place » limités à la capacité (réservations déjà prises + inscrites dans le Sheet).
   const fAsk = L.clean(b.formule, 20), nAsk = parseInt(b.invites, 10) || 0;
