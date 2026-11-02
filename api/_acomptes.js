@@ -6,5 +6,5 @@
 module.exports = {
   'halloween-repas-2026-10-31': { cle: 'QOnrwXSxKA4F', prixEnfant: 15, enfantTexte: 'Enfants de 6 à 12 ans (15 €)' },
   'reveillon-2026-12-31': { cle: '6gY2sDJdXDHW', prixEnfant: 30, enfantTexte: 'Enfants jusqu\'à 15 ans (menu 30 €)',
-    solde: { texte: 'à régler en ligne entre le 1er et le 10 décembre' } },
+    solde: { texte: 'à régler en ligne entre le 1er et le 5 décembre' } },
 };
