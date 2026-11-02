@@ -224,10 +224,10 @@ function miseEnForme() {
   v.getRange('F4').insertCheckboxes(); v.getRange('G4').setValue('Afficher aussi les annulées').setFontColor('#5B4F78');
 
   // Chiffres clés
-  const cartes = [['Réservations', '=IF($Z$1="";"";COUNTIFS(Reservations!B:B;$Z$1;Reservations!G:G;"confirmé"))'],
-    ['Personnes', '=IF($Z$1="";"";SUMIFS(Reservations!F:F;Reservations!B:B;$Z$1;Reservations!G:G;"confirmé"))'],
+  const cartes = [['Places réservées (personnes)', '=IF($Z$1="";"";SUMIFS(Reservations!F:F;Reservations!B:B;$Z$1;Reservations!G:G;"confirmé"))'],
+    ['Nombre de réservations (groupes)', '=IF($Z$1="";"";COUNTIFS(Reservations!B:B;$Z$1;Reservations!G:G;"confirmé"))'],
     ['Places restantes', '=IF($Z$1="";"";IFERROR(INDEX(Soirees!D2:D200;MATCH($Z$1;Soirees!A2:A200;0));""))'],
-    ['Liste d\'attente', '=IF($Z$1="";"";SUMIFS(Reservations!F:F;Reservations!B:B;$Z$1;Reservations!G:G;"attente"))']];
+    ['Liste d\'attente (personnes)', '=IF($Z$1="";"";SUMIFS(Reservations!F:F;Reservations!B:B;$Z$1;Reservations!G:G;"attente"))']];
   cartes.forEach((c, i) => {
     const col = 1 + i * 2;
     v.getRange(6, col, 1, 2).merge().setValue(c[0]).setFontColor('#5B4F78').setFontSize(10).setBackground(CREME).setHorizontalAlignment('center');
