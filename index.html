@@ -508,6 +508,44 @@ dialog.legal-box::backdrop{background:rgba(6,4,16,.82);backdrop-filter:blur(4px)
 .legal-in ul{padding-left:22px;margin:0 0 12px;list-style:disc}
 .legal-in li{margin-bottom:4px}
 dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
+/* Fenêtre « Réserver une soirée » : grande, simple, lisible */
+dialog.resa-box{width:min(100% - 16px,640px)}
+.resa-box .legal-in{padding:clamp(22px,5vw,40px);font-size:1.12rem}
+.resa-box h1{font-size:clamp(1.9rem,6vw,2.5rem)}
+.resa-sub{margin:4px 0 20px;color:var(--ink-soft)}
+.resa-list{display:grid;gap:12px}
+.resa-pick{display:grid;gap:4px;width:100%;text-align:left;padding:18px 20px;border-radius:18px;border:2px solid rgba(29,19,56,.18);background:#fff;color:var(--ink);font:inherit;cursor:pointer}
+.resa-pick:hover,.resa-pick:focus-visible{border-color:var(--ink);outline:none}
+.resa-pick b{font-size:1.15rem}
+.resa-pick .d{font-weight:700;color:#7B3FD6}
+.resa-pick .p{color:var(--ink-soft);font-size:1rem}
+.resa-pick[disabled]{opacity:.55;cursor:default}
+.resa-pick .tag{justify-self:start;margin-top:4px;padding:3px 12px;border-radius:999px;background:#FFD6D1;color:#7A1F16;font-size:.9rem;font-weight:700}
+.resa-pick .tag.ok{background:#DDF5CF;color:#24601A}
+.resa-help{margin:22px 0 0;padding:14px 18px;border-radius:14px;background:#FFF1C9;line-height:1.5}
+.resa-back{border:0;background:none;padding:0;margin:0 0 14px;font:inherit;font-weight:700;color:#7B3FD6;cursor:pointer}
+.resa-ev{padding:18px 20px;border-radius:18px;background:var(--ink);color:var(--cream);margin-bottom:22px}
+.resa-ev .d{margin:0;color:var(--bulb);font-weight:700}
+.resa-ev h2{margin:4px 0 8px;font-family:var(--display);font-weight:400;font-size:1.7rem;line-height:1.1;color:var(--cream)}
+.resa-ev p{margin:0;line-height:1.5;color:var(--cream)}
+.resa-q{display:grid;gap:8px;margin:0 0 18px}
+.resa-q > label,.resa-q > span{font-weight:700}
+.resa-q input:not([type=checkbox]){width:100%;min-height:58px;padding:12px 16px;border-radius:14px;border:2px solid rgba(29,19,56,.25);background:#fff;color:var(--ink);font:inherit;font-size:1.15rem}
+.resa-q input:focus-visible{outline:3px solid #7B3FD6;outline-offset:1px;border-color:var(--ink)}
+.resa-q [aria-invalid="true"]{border-color:#C6392E!important}
+.resa-q .err{color:#C6392E;font-weight:600;font-size:1rem}
+.resa-2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+@media (max-width:520px){.resa-2{grid-template-columns:1fr}}
+.resa-box .stepper{justify-self:start;border-color:rgba(29,19,56,.25);padding:5px;gap:10px}
+.resa-box .stepper button{width:54px;height:54px;background:rgba(29,19,56,.08);color:var(--ink);font-size:1.6rem}
+.resa-box .stepper output{font-size:1.5rem;min-width:3ch;color:var(--ink)}
+.resa-total{margin:6px 0 0;color:var(--ink-soft)}
+.resa-ok{display:flex;gap:12px;align-items:flex-start;margin:4px 0 6px;line-height:1.45}
+.resa-ok input{width:26px;height:26px;flex:none;margin-top:2px}
+.resa-send{width:100%;min-height:62px;font-size:1.2rem;margin-top:12px}
+.resa-msg{margin:14px 0 0;padding:12px 16px;border-radius:12px;background:#FFD6D1;color:#7A1F16;font-weight:600}
+.priv-soiree{margin-top:12px;padding:14px 16px;border-radius:14px;background:#FFF1C9;color:#1D1338;line-height:1.5}
+.priv-soiree .btn{margin-top:10px}
 .legal-in a{color:var(--ink);font-weight:600}
 .legal-in dl{margin:0 0 12px;display:grid;grid-template-columns:minmax(0,220px) minmax(0,1fr);gap:8px 18px}
 .legal-in dt{color:var(--ink-soft)}.legal-in dd{margin:0;font-weight:600}
@@ -586,7 +624,8 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
       <a href="#galerie">Photos</a>
       <a href="#agenda">Soirées</a>
       <a href="#plateaux">Plateaux</a>
-      <a href="#reserver">Réserver</a>
+      <a href="#agenda" data-resa>Réserver une soirée</a>
+      <a href="#reserver">Privatiser</a>
     </nav>
     <a class="top-tel" href="tel:+33326075910" aria-label="Appeler La Caravane au 03 26 07 59 10">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg>
@@ -612,8 +651,8 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
         <h1><span>Ce soir,</span><span>la salle</span><span>est à vous.</span></h1>
         <p class="hero-lead">Une guinguette pas comme les autres à Bétheny, aux portes de Reims : une vraie caravane au milieu de la salle, un bar, des guirlandes, et de la place pour 200 invités. Privatisez-la en entier ou réservez-y votre coin de fête.</p>
         <div class="hero-cta">
-          <a class="btn btn-main" href="#reserver">Réserver ma date</a>
-          <a class="btn btn-ghost" href="#visite">Visiter la salle à 360°</a>
+          <a class="btn btn-main" href="#agenda" data-resa>Réserver une soirée</a>
+          <a class="btn btn-ghost" href="#reserver">Privatiser la salle</a>
         </div>
       </div>
       <div class="show-wrap">
@@ -817,8 +856,9 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
 <section class="band devis" id="reserver">
   <div class="wrap devis-grid">
     <div>
-      <h2>Réservez votre date</h2>
-      <p class="devis-intro">Dites-nous quand vous voulez venir et comment. Nous vous confirmons la disponibilité de la date.</p>
+      <h2>Privatiser la salle</h2>
+      <p class="devis-intro">Mariage, anniversaire, EVJF ou EVG, baptême, repas d'entreprise… Dites-nous la date et le nombre d'invités : nous vous rappelons pour tout organiser.</p>
+      <div class="priv-soiree"><b>Vous voulez venir à une soirée de l'agenda</b> (Nouba, concert, célibataires…) ? Ce n'est pas ce formulaire.<br><a class="btn btn-ink" href="#agenda" data-resa>Réserver une soirée</a></div>
       <p class="devis-intro"><strong>Ouvert au public du vendredi au dimanche.</strong> Du lundi au jeudi, La Caravane accueille uniquement les privatisations.</p>
       <div class="acompte" id="acompteBox">
         <strong>Un acompte de 30 % confirme votre place à la soirée repas</strong>, réglable en ligne par lien sécurisé.
@@ -832,7 +872,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
     </div>
 
     <form class="form" id="form" novalidate>
-      <div class="f"><label for="date">Date souhaitée</label><input id="date" name="date" type="date" required aria-describedby="e-date"><span class="err" id="e-date"></span></div>
+      <div class="f"><label for="date">Date souhaitée</label><input id="date" name="date" type="date" required aria-describedby="e-date"><span class="err" id="e-date"></span><div class="priv-soiree" id="privSoiree" hidden></div></div>
       <div class="f"><label for="fGuests">Nombre d'invités</label><input id="fGuests" name="invites" type="number" min="1" max="200" inputmode="numeric" required aria-describedby="e-fGuests"><span class="err" id="e-fGuests"></span></div>
       <fieldset class="f full">
         <legend>Qu'est-ce qu'on fête ?</legend>
@@ -843,8 +883,6 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
         <div class="chips" id="fFormule">
           <label class="chip"><input type="radio" name="fformule" value="exclu" checked><span>Privatisation, toute la salle</span></label>
           <label class="chip"><input type="radio" name="fformule" value="conviv"><span>Convivialité, dès 30 personnes</span></label>
-          <label class="chip"><input type="radio" name="fformule" value="pass"><span>Pass soirée, entrée et 1 boisson</span></label>
-          <label class="chip"><input type="radio" name="fformule" value="soiree"><span>Soirée repas de l'agenda</span></label>
         </div>
       </fieldset>
       <div class="f full" id="eventField" hidden><label for="fEvent">Quelle soirée ?</label><select id="fEvent" name="soiree"></select></div>
@@ -883,12 +921,41 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
         <span class="err" id="e-ok"></span>
       </div>
       <div class="form-end">
-        <button class="btn btn-ink" type="submit" id="send">Envoyer ma demande de réservation</button>
+        <button class="btn btn-ink" type="submit" id="send">Envoyer ma demande de privatisation</button>
       </div>
       <div class="status" id="status" role="status" hidden></div>
     </form>
   </div>
 </section>
+<dialog class="legal-box resa-box" id="resaBox" aria-labelledby="resaT">
+  <div class="legal-in">
+    <button class="legal-close" type="button" aria-label="Fermer">×</button>
+    <div id="resaStep1">
+      <h1 id="resaT">Réserver une soirée</h1>
+      <p class="resa-sub">Touchez la soirée qui vous intéresse.</p>
+      <div class="resa-list" id="resaList"></div>
+      <p class="resa-help">Mariage, anniversaire, EVJF ou EVG, repas d'entreprise ? Ce n'est pas ici : <a href="#reserver" data-close-resa><b>privatiser la salle</b></a>.<br>Une question ? Appelez le <a href="tel:+33326075910"><b>03 26 07 59 10</b></a>.</p>
+    </div>
+    <form id="resaForm" novalidate hidden>
+      <button type="button" class="resa-back" id="resaBack">← Voir les autres soirées</button>
+      <div class="resa-ev" id="resaEv"></div>
+      <div class="resa-q"><span id="resaNLab">Combien de personnes ?</span>
+        <div class="stepper" role="group" aria-labelledby="resaNLab"><button type="button" data-rn="-1" aria-label="Une personne de moins">−</button><output id="resaN">2</output><button type="button" data-rn="1" aria-label="Une personne de plus">+</button></div>
+        <p class="resa-total" id="resaTotal"></p>
+      </div>
+      <div class="resa-2">
+        <div class="resa-q"><label for="rPrenom">Prénom</label><input id="rPrenom" autocomplete="given-name"><span class="err" id="e-rPrenom"></span></div>
+        <div class="resa-q"><label for="rNom">Nom</label><input id="rNom" autocomplete="family-name"><span class="err" id="e-rNom"></span></div>
+      </div>
+      <div class="resa-q"><label for="rTel">Téléphone</label><input id="rTel" type="tel" inputmode="tel" autocomplete="tel" placeholder="06 12 34 56 78"><span class="err" id="e-rTel"></span></div>
+      <div class="resa-q"><label for="rEmail">E-mail <span style="font-weight:400">(pour recevoir la confirmation)</span></label><input id="rEmail" type="email" inputmode="email" autocomplete="email" placeholder="prenom@exemple.fr"><span class="err" id="e-rEmail"></span></div>
+      <label class="resa-ok"><input type="checkbox" id="rOk"><span>J'accepte les <a href="#cgv" data-legal="cgv">conditions de vente</a> et la <a href="#confidentialite" data-legal="confidentialite">confidentialité</a>.</span></label>
+      <span class="err" id="e-rOk" style="color:#C6392E;font-weight:600"></span>
+      <button class="btn btn-ink resa-send" type="submit" id="rSend">Réserver</button>
+      <p class="resa-msg" id="rMsg" hidden></p>
+    </form>
+  </div>
+</dialog>
 <dialog class="legal-box" id="dlg-mentions" aria-labelledby="dlg-mentions-t">
   <div class="legal-in">
     <button class="legal-close" type="button" aria-label="Fermer">×</button>
@@ -1093,7 +1160,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
 
 <div class="dock" id="dock">
   <a class="btn btn-ghost" href="tel:+33326075910">Appeler</a>
-  <a class="btn btn-main" href="#reserver">Réserver ma date</a>
+  <a class="btn btn-main" href="#agenda" data-resa>Réserver une soirée</a>
 </div>
 <div class="road" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210.76 208.09"><defs><style>.cv-1{fill:#faebd3;}.cv-2{fill:#e45e4f;}.cv-3{fill:#c6392e;}.cv-4{fill:#ff7d73;}.cv-5{fill:#4a1801;}.cv-6{fill:#fedb97;}.cv-7{fill:#ceae74;}.cv-8{fill:#917343;}.cv-9{fill:#914b29;}.cv-10,.cv-12,.cv-13{fill:none;stroke-linecap:round;stroke-linejoin:round;}.cv-10,.cv-12{stroke:#4a1801;}.cv-10{stroke-width:0.96px;}.cv-11{fill:#ffb000;}.cv-12{stroke-width:1.18px;}.cv-13{stroke:#914b29;stroke-width:3.22px;}</style></defs><g id="Calque_2" data-name="Calque 2"><g id="OBJECTS"><path class="cv-1" d="M.06,138.64s-1-29.86,5.41-38.21l10.91,38.2Z"/><rect class="cv-1" x="1.21" y="53.24" width="209.54" height="135.66" rx="67.83"/><path class="cv-2" d="M3.46,138.33A68.09,68.09,0,0,0,69,188.89h73.89a68.09,68.09,0,0,0,65.58-50.56Z"/><path class="cv-3" d="M124.92,156.87h57.56A17.08,17.08,0,0,1,199.56,174v14a0,0,0,0,1,0,0H107.85a0,0,0,0,1,0,0V174A17.08,17.08,0,0,1,124.92,156.87Z"/><path class="cv-4" d="M180.78,152.78H126.63c-13.11,0-23.73,8.79-23.73,19.62v15.53c0,2.26,2.21,4.09,4.95,4.09h0c2.63,0,4.76-1.76,4.76-3.93l.19-9.41V172.4c0-6.31,6.19-11.43,13.83-11.43h54.15c7.64,0,13.83,5.12,13.83,11.43l.4,15.86c0,2.08,2,3.76,4.55,3.76h0c2.73,0,4.95-1.83,4.95-4.09V172.4C204.51,161.57,193.89,152.78,180.78,152.78Z"/><circle class="cv-5" cx="131.83" cy="188.29" r="19.8"/><circle class="cv-6" cx="131.83" cy="188.29" r="10.46"/><circle class="cv-7" cx="131.83" cy="188.29" r="4.74"/><circle class="cv-5" cx="174.2" cy="188.29" r="19.8"/><circle class="cv-6" cx="174.2" cy="188.29" r="10.46"/><circle class="cv-7" cx="174.2" cy="188.29" r="4.74"/><rect class="cv-7" x="92.47" y="82.9" width="86.68" height="42.62" rx="12.98"/><path class="cv-8" d="M160.05,107.92v0c-2.85-.63-5.82-1.24-8.32-2.82a15.93,15.93,0,0,1-5.33-6.41C143.85,93.87,142,88.39,142,82.9H129.85a47.91,47.91,0,0,1-4.33,15.8c-2.61,5.49-6.43,10.64-12.82,11.18v15.64h47.35Z"/><path class="cv-9" d="M188.38,131.68H91.59a4.35,4.35,0,0,1-4.34-4.34h0A4.35,4.35,0,0,1,91.59,123h96.79a4.34,4.34,0,0,1,4.33,4.33h0A4.35,4.35,0,0,1,188.38,131.68Z"/><path class="cv-10" d="M79.55,131.66c-.89-2.34-43.26-52.9-43.26-52.9"/><polygon class="cv-11" points="88.93 21.17 128.33 35.28 128.33 1.76 88.93 21.17"/><polyline class="cv-12" points="128.33 0.59 128.33 29.4 128.33 46.45"/><path class="cv-5" d="M137.73,52.92a9.43,9.43,0,0,0-18.69,0Z"/><rect class="cv-2" x="0.06" y="138.64" width="76.36" height="50.39"/><path class="cv-1" d="M189.06,146.39H83.46a1.35,1.35,0,0,1-1.34-1.34h0a1.35,1.35,0,0,1,1.34-1.34h105.6a1.34,1.34,0,0,1,1.34,1.34h0A1.34,1.34,0,0,1,189.06,146.39Z"/><path class="cv-1" d="M101.42,154.16H83.19a1.35,1.35,0,0,1-1.34-1.34h0a1.35,1.35,0,0,1,1.34-1.34h18.23a1.35,1.35,0,0,1,1.34,1.34h0A1.34,1.34,0,0,1,101.42,154.16Z"/><path class="cv-5" d="M39.65,77.78H63.24A10.43,10.43,0,0,1,73.67,88.21V178a0,0,0,0,1,0,0H28a0,0,0,0,1,0,0V89.45A11.67,11.67,0,0,1,39.65,77.78Z"/><rect class="cv-7" x="60.14" y="119.05" width="3.75" height="26.27"/><path class="cv-7" d="M67.11,122.27a4.83,4.83,0,1,1-4.82-4.83A4.82,4.82,0,0,1,67.11,122.27Z"/><path class="cv-1" d="M64.78,126.94l-9.6,8.72a1.24,1.24,0,0,1-1.74-.08h0a1.24,1.24,0,0,1,.09-1.74l9.6-8.72a1.24,1.24,0,0,1,1.74.09h0A1.23,1.23,0,0,1,64.78,126.94Z"/><path class="cv-1" d="M78.26,183.91H27a3.87,3.87,0,0,1-3.86-3.86h0A3.88,3.88,0,0,1,27,176.19H78.26a3.87,3.87,0,0,1,3.86,3.86h0A3.86,3.86,0,0,1,78.26,183.91Z"/><path class="cv-9" d="M83.73,190.88H25.84a3.76,3.76,0,0,1-3.75-3.75h0a3.76,3.76,0,0,1,3.75-3.75H83.73a3.76,3.76,0,0,1,3.75,3.75h0A3.76,3.76,0,0,1,83.73,190.88Z"/><line class="cv-13" x1="36.02" y1="188.74" x2="25.57" y2="202.41"/><line class="cv-13" x1="77.3" y1="189.81" x2="66.85" y2="203.48"/><line class="cv-13" x1="30.13" y1="197.31" x2="71.4" y2="197.31"/></g></g></svg></div>
 
@@ -1212,7 +1279,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
       ['Plat', 'Plat chaud au choix, 15 parts minimum par spécialité.'],
       ['Dessert', 'Entremets aux fruits ou gâteau aux 3 chocolats, ou les deux, faits en pâtisserie.']] }
   };
-  var MIN_CONVIV = 30, MAX = 200;
+  var MIN_CONVIV = 30, MIN_PRIV = 20, MAX = 200;
   var SOIREE_MAX = 160; /* plafond de places par soirée, quelle que soit la valeur de « places » */
   var GALLERY = [
     ['salle-vue-ensemble.jpg', 'La salle en lumières de fête'],
@@ -1643,12 +1710,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
   $('#plGrid').addEventListener('click', function (e) { var b = e.target.closest('[data-plposter]'); if (!b) return; var p = PLATEAUX.filter(function (x) { return x.id === b.dataset.plposter; })[0]; openPoster(p.affiche, p.nom); });
 
   /* ---------- Réserver depuis une soirée ---------- */
-  function bookEvent(id, kind) {
-    var ev = evById(id); if (!ev) return;
-    var f = kind === 'attente' ? (ev.type === 'pass' ? 'pass' : 'soiree') : kind;
-    $$('input[name=fformule]').forEach(function (r) { r.checked = r.value === f; });
-    syncForm(); $('#fEvent').value = id; $('#fGuests').value = kind === 'soiree' ? (qty[id] || 2) : 2; syncForm();
-  }
+  function bookEvent(id) { openResa(id); }
 
   if (ymd(new Date()) > '2026-11-06') { var an = $('#annonceReport'); if (an) an.remove(); var lf = $('#legFermeture'); if (lf) lf.remove(); }
   renderEvents(); renderCal();
@@ -1686,7 +1748,7 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
     $('#acompteBox').hidden = !(soiree && ev && !wait && !ev.surPlace);
     $('#date').readOnly = !!ev; if (ev) $('#date').value = ev.date;
     $('label[for=fGuests]').textContent = pass && !(ev && ev.gratuit) ? 'Nombre de pass' : wait ? 'Nombre de personnes' : 'Nombre d\'invités';
-    $('#fGuests').min = f === 'conviv' ? MIN_CONVIV : 1;
+    $('#fGuests').min = f === 'conviv' ? MIN_CONVIV : f === 'exclu' ? MIN_PRIV : 1;
     $('#fGuests').max = ev ? 20 : MAX;
     var g = +$('#fGuests').value || 0;
     $('#acompteAmount').textContent = soiree && ev && !wait && !ev.surPlace ? 'Soit ' + euro(Math.round(g * ev.prix * DEPOSIT * 100) / 100) + ' pour ' + g + ' place' + (g > 1 ? 's' : '') + ' à ' + euro(ev.prix) + '.' : '';
@@ -1750,8 +1812,8 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
     org: function (v) { return $('#org').required && !v ? 'Indiquez le nom de votre entreprise ou organisation.' : ''; },
     email: function (v) { return !v ? 'Indiquez votre e-mail pour recevoir le devis.' : /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v) ? '' : 'Cet e-mail semble incomplet. Exemple : prenom@exemple.fr'; },
     tel: function (v) { return !v ? 'Indiquez un numéro où vous joindre.' : v.replace(/\D/g, '').length >= 9 ? '' : 'Ce numéro semble trop court. Exemple : 06 12 34 56 78'; },
-    date: function (v) { return !v ? 'Choisissez la date de votre soirée.' : v < $('#date').min ? 'Choisissez une date à venir.' : samediPrive(v) && !$('#date').readOnly ? 'La salle est déjà privatisée tous les samedis jusqu\'au 30 novembre. Choisissez un autre jour.' : fFormule() === 'conviv' && !$('#date').readOnly && fermePublic(v) ? FERME_PUBLIC_MSG : ''; },
-    fGuests: function (v) { var n = +v, min = +$('#fGuests').min, max = +$('#fGuests').max; return !n ? 'Indiquez le nombre de personnes.' : n < min ? 'Cette formule est réservable à partir de ' + min + ' personnes.' : n > max ? 'Maximum ' + max + ' pour cette réservation.' : ''; },
+    date: function (v) { var ag = v && UPCOMING.filter(function (x) { return x.date === v; })[0]; return ag ? 'Ce jour-là, c\'est la soirée « ' + ag.titre + ' » : la salle n\'est pas privatisable.' : !v ? 'Choisissez la date de votre soirée.' : v < $('#date').min ? 'Choisissez une date à venir.' : samediPrive(v) && !$('#date').readOnly ? 'La salle est déjà privatisée tous les samedis jusqu\'au 30 novembre. Choisissez un autre jour.' : fFormule() === 'conviv' && !$('#date').readOnly && fermePublic(v) ? FERME_PUBLIC_MSG : ''; },
+    fGuests: function (v) { var n = +v, min = +$('#fGuests').min, max = +$('#fGuests').max; return !n ? 'Indiquez le nombre de personnes.' : n < min ? 'Cette formule est réservable à partir de ' + min + ' personnes. Pour venir à quelques-uns, réservez plutôt une soirée de l\'agenda.' : n > max ? 'Maximum ' + max + ' pour cette réservation.' : ''; },
     msg: function () { return ''; }
   };
   /* L'erreur disparaît pendant la saisie (pas au blur : le décalage de mise en page ferait rater le clic suivant) */
@@ -1820,12 +1882,124 @@ dialog.legal-box:focus,dialog.legal-box:focus-visible{outline:none}
     }).catch(function () { fail2(); });
   });
 
+
+  /* =====================================================================
+     RÉSERVER UNE SOIRÉE (fenêtre simple, séparée de la privatisation)
+     ===================================================================== */
+  var rb = $('#resaBox'), rEv = null, rN = 2;
+  function cap1(t) { return t.charAt(0).toUpperCase() + t.slice(1); }
+  function rWait(e) { return evFull(e) && evWait(e); }
+  function rOpen(e) { return !evAVenir(e) && (!evFull(e) || evWait(e)); }
+  function rMax(e) { return rWait(e) || e.gratuit ? 20 : Math.max(1, Math.min(20, evLeft(e))); }
+  function rAcompte(e) { return e.type === 'repas' && !e.surPlace && !rWait(e); }
+  function rPrixTxt(e) {
+    if (rWait(e)) return 'Cette soirée est complète. Inscrivez-vous sur la liste d\'attente : on vous appelle si une place se libère.';
+    if (e.gratuit) return 'Entrée gratuite. Rien à payer pour réserver.';
+    if (e.type === 'pass') return 'Pass ' + euro(e.prix) + ' par personne, avec 1 boisson. Il se paie sur place, le soir même : rien à payer maintenant.';
+    if (e.surPlace) return euro(e.prix) + ' par personne (' + e.prixTexte.replace(/^par personne : /, '') + '). Rien à payer maintenant.';
+    return euro(e.prix) + ' par personne. Un acompte de 30 % se paie en ligne pour confirmer, le reste sur place.';
+  }
+  function openResa(id) {
+    var e = id ? evById(id) : null;
+    rEv = e && rOpen(e) ? e : null;
+    renderResa(); if (!rb.open) rb.showModal();
+    $('.legal-in', rb).scrollTop = 0;
+  }
+  function renderResa() {
+    $('#rMsg').hidden = true;
+    $('#resaStep1').hidden = !!rEv; $('#resaForm').hidden = !rEv;
+    if (!rEv) {
+      var list = UPCOMING.filter(function (e) { return !(evFull(e) && !evWait(e)); });
+      $('#resaList').innerHTML = list.length ? list.map(function (e) {
+        var avenir = evAVenir(e), tag = avenir ? '<span class="tag">' + evOuvTxt(e) + '</span>' : rWait(e) ? '<span class="tag">Complet, liste d\'attente</span>' : '<span class="tag ok">Places disponibles</span>';
+        return '<button type="button" class="resa-pick" data-rpick="' + e.id + '"' + (avenir ? ' disabled' : '') + '><span class="d">' + cap1(evDate(e).court) + '</span><b>' + esc(e.titre) + '</b><span class="p">' + (e.gratuit ? 'Entrée gratuite' : e.type === 'pass' ? 'Pass ' + euro(e.prix) + ', réglé sur place' : euro(e.prix) + ' par personne') + '</span>' + tag + '</button>';
+      }).join('') : '<p>Aucune soirée ouverte à la réservation pour le moment.</p>';
+      return;
+    }
+    var e = rEv, d = evDate(e);
+    rN = Math.max(1, Math.min(rMax(e), rN));
+    $('#resaEv').innerHTML = '<p class="d">' + cap1(d.long) + ', ' + e.heure + '</p><h2>' + esc(e.titre) + '</h2><p>' + rPrixTxt(e) + '</p>';
+    rNUpdate();
+  }
+  function rNUpdate() {
+    var e = rEv; $('#resaN').textContent = rN;
+    var tot = e.gratuit || rWait(e) ? '' : rN + ' × ' + euro(e.prix) + ' = ' + euro(rN * e.prix) + (rAcompte(e) ? ' · acompte en ligne : ' + euro(Math.round(rN * e.prix * DEPOSIT * 100) / 100) : ', à payer sur place');
+    $('#resaTotal').textContent = tot;
+    $('#rSend').textContent = rWait(e) ? 'M\'inscrire sur la liste d\'attente' : rAcompte(e) ? 'Payer l\'acompte de ' + euro(Math.round(rN * e.prix * DEPOSIT * 100) / 100) : 'Réserver ' + (rN > 1 ? 'mes ' + rN + ' places' : 'ma place');
+  }
+  $('#resaList').addEventListener('click', function (ev) { var b = ev.target.closest('[data-rpick]'); if (!b || b.disabled) return; rEv = evById(b.dataset.rpick); renderResa(); $('.legal-in', rb).scrollTop = 0; });
+  $('#resaBack').addEventListener('click', function () { rEv = null; renderResa(); });
+  rb.addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-rn]'); if (b) { rN = Math.max(1, Math.min(rMax(rEv), rN + +b.dataset.rn)); rNUpdate(); return; }
+    if (ev.target.closest('[data-close-resa]')) rb.close();
+  });
+  /* Tous les boutons « Réserver une soirée » et « Réserver » des cartes ouvrent la fenêtre */
+  document.addEventListener('click', function (ev) {
+    var a = ev.target.closest('[data-resa],[data-book]'); if (!a) return;
+    ev.preventDefault(); closeNav();
+    openResa(a.dataset.book || '');
+  }, true);
+
+  var RR = {
+    rPrenom: function (v) { return v ? '' : 'Indiquez votre prénom.'; },
+    rNom: function (v) { return v ? '' : 'Indiquez votre nom.'; },
+    rTel: function (v) { return v.replace(/\D/g, '').length >= 9 ? '' : 'Indiquez votre numéro de téléphone (10 chiffres).'; },
+    rEmail: function (v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v) ? '' : 'Indiquez votre e-mail. Exemple : prenom@exemple.fr'; }
+  };
+  Object.keys(RR).forEach(function (id) { $('#' + id).addEventListener('input', function () { if ($('#' + id).hasAttribute('aria-invalid') && !RR[id]($('#' + id).value.trim())) fail(id, ''); }); });
+  $('#rOk').addEventListener('change', function () { if ($('#rOk').checked) $('#e-rOk').textContent = ''; });
+  function rSay(t) { $('#rMsg').textContent = t; $('#rMsg').hidden = false; $('#rMsg').scrollIntoView({ block: 'nearest', behavior: calm ? 'auto' : 'smooth' }); }
+
+  $('#resaForm').addEventListener('submit', function (ev) {
+    ev.preventDefault(); $('#rMsg').hidden = true;
+    var e = rEv, bad = null; if (!e) return;
+    Object.keys(RR).forEach(function (id) { if (!fail(id, RR[id]($('#' + id).value.trim())) && !bad) bad = $('#' + id); });
+    $('#e-rOk').textContent = $('#rOk').checked ? '' : 'Cochez cette case pour réserver.';
+    if (!$('#rOk').checked && !bad) bad = $('#rOk');
+    if (bad) { bad.focus(); return; }
+    var wait = rWait(e), f = e.type === 'pass' ? 'pass' : 'soiree';
+    var nom = $('#rPrenom').value.trim() + ' ' + $('#rNom').value.trim(), dateFr = evDate(e).long;
+    var quoi = wait ? 'LISTE D\'ATTENTE : ' + e.titre + ' (' + dateFr + '), ' + rN + ' personne' + (rN > 1 ? 's' : '')
+      : e.gratuit ? 'Table, entrée gratuite : ' + e.titre + ' (' + dateFr + '), ' + rN + ' personne' + (rN > 1 ? 's' : '')
+      : f === 'pass' ? 'Pass soirée : ' + e.titre + ' (' + dateFr + '), ' + rN + ' pass à ' + euro(e.prix) + ', réglés sur place'
+      : e.surPlace ? 'Soirée repas : ' + e.titre + ' (' + dateFr + '), ' + rN + ' place' + (rN > 1 ? 's' : '') + ' à ' + euro(e.prix) + ', réglé sur place'
+      : 'Soirée repas : ' + e.titre + ' (' + dateFr + '), ' + rN + ' place' + (rN > 1 ? 's' : '') + ' à ' + euro(e.prix) + ', acompte 30 % : ' + euro(Math.round(rN * e.prix * DEPOSIT));
+    var txt = ['Bonjour,', '', wait ? 'Je souhaite être inscrit(e) sur la liste d\'attente.' : 'Je souhaite réserver à La Caravane.', '',
+      'Date : ' + dateFr, 'Réservation : ' + quoi, '', 'Nom : ' + nom, 'E-mail : ' + $('#rEmail').value.trim(), 'Téléphone : ' + $('#rTel').value.trim(), '', 'Merci,', nom].join('\n');
+    var payload = { subject: (wait ? 'Liste d\'attente' : f === 'pass' ? 'Pass soirée' : 'Soirée repas') + ', ' + e.titre + ', ' + dateFr, message: txt,
+      nom: nom, email: $('#rEmail').value.trim(), telephone: $('#rTel').value.trim(), date: e.date, invites: String(rN), occasion: '', formule: f,
+      soiree: e.id, attente: wait, plateaux: '', options: '', precisions: '', botcheck: '' };
+    var btn = $('#rSend'), label = btn.textContent; btn.disabled = true; btn.textContent = 'Un instant…';
+    var ko = function (m) { rSay(m || 'La réservation n\'est pas partie. Réessayez, ou appelez le 03 26 07 59 10.'); btn.disabled = false; btn.textContent = label; };
+    if (!ONLINE) { ko('La réservation fonctionne une fois le site en ligne.'); return; }
+    var url = rAcompte(e) ? CHECKOUT_ENDPOINT : FORM_ENDPOINT;
+    fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(payload) })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { j.httpOk = r.ok; return j; }); })
+      .then(function (j) {
+        if (j.httpOk && j.url) { window.location.href = j.url; return; }
+        if (j.error === 'complet') { if (!j.restant) { e.reservees = evCap(e); renderEvents(); renderCal(); } ko(j.restant ? 'Il ne reste que ' + j.restant + ' place' + (j.restant > 1 ? 's' : '') + ' pour cette soirée. Réduisez le nombre de personnes.' : 'Cette soirée vient d\'être complète. Désolé !'); return; }
+        if (j.error === 'pas_ouvert') { ko(evOuvTxt(e) + '.'); return; }
+        if (!j.httpOk) { ko(); return; }
+        var q = new URLSearchParams({ type: wait ? 'attente' : f === 'pass' ? 'pass' : 'place', prenom: $('#rPrenom').value.trim(), soiree: e.titre, date: e.date, n: String(rN), prix: e.prix });
+        if (e.gratuit) q.set('gratuit', '1');
+        window.location.href = 'merci.html?' + q.toString();
+      }).catch(function () { ko(); });
+  });
+
+  /* Privatisation : un jour de soirée de l'agenda, on renvoie vers la bonne réservation */
+  $('#date').addEventListener('change', function () {
+    var v = $('#date').value, ag = UPCOMING.filter(function (x) { return x.date === v; })[0], box = $('#privSoiree');
+    if (!ag) { box.hidden = true; return; }
+    box.innerHTML = 'Le ' + evDate(ag).court + ', c\'est la soirée <b>« ' + esc(ag.titre) + ' »</b>. Pour y venir, réservez votre place ici :<br><a class="btn btn-ink" href="#agenda" data-book="' + ag.id + '">Réserver cette soirée</a>';
+    box.hidden = false;
+  });
+
   /* Pages légales : ouverture en fenêtre (liens data-legal, ou adresse #mentions, #confidentialite, #cgv) */
   function openLegal(k) { var d = $('#dlg-' + k); if (!d) return; $$('dialog.legal-box[open]').forEach(function (x) { x.close(); }); d.showModal(); $('.legal-in', d).scrollTop = 0; }
   document.addEventListener('click', function (e) {
     var a = e.target.closest('[data-legal]'); if (a) { e.preventDefault(); openLegal(a.dataset.legal); return; }
     if (e.target.closest('.legal-close')) { e.target.closest('dialog').close(); return; }
-    if (e.target.matches && e.target.matches('dialog.legal-box')) e.target.close();
+    if (e.target.matches && e.target.matches('dialog.legal-box:not(.resa-box)')) e.target.close();
   });
   function legalHash() { var h = location.hash.slice(1); if (h === 'mentions' || h === 'confidentialite' || h === 'cgv') openLegal(h); }
   window.addEventListener('hashchange', legalHash); legalHash();

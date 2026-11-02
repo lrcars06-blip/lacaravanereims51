@@ -34,6 +34,13 @@ dans le Sheet (chaque client s'y inscrit en payant), sinon elles compteraient de
 Même circuit que le site : facture d'acompte, e-mails, ligne dans le Sheet, rappel la veille, compte rendu.
 Pour désactiver un lien : supprimer sa ligne dans `api/_acomptes.js`. Pour une nouvelle soirée : ajouter une ligne avec une nouvelle clé.
 
+## Deux parcours séparés sur le site
+- **Réserver une soirée** (boutons jaunes, cartes de l'agenda) : fenêtre simple. Soirée, nombre de personnes, prénom, nom, téléphone, e-mail.
+  La réservation est inscrite dans le Google Sheet AVANT l'envoi des e-mails (3 essais). Si le Sheet ne répond pas,
+  l'e-mail reçu par La Caravane commence par « ⚠️ À AJOUTER AU SHEET ».
+- **Privatiser la salle** (section #reserver) : mariage, anniversaire, EVJF/EVG, entreprise. À partir de 20 personnes,
+  jamais un jour de soirée de l'agenda (refusé sur le site et sur le serveur). Demande par e-mail uniquement, pas dans le Sheet.
+
 ## Jours d'ouverture
 Ouvert au public du vendredi au dimanche. Du lundi au jeudi : privatisation uniquement (formule Convivialité refusée ces jours-là, sauf soirée de l'agenda), côté formulaire (index.html, fermePublic) et côté serveur (api/reserver.js).
 

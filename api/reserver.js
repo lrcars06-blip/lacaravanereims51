@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
   if (L.clean(b.formule, 20) === 'conviv' && FERMETURES.includes(b.date)) return L.json(res, 400, { ok: false, error: 'ferme' });
 
   // Soirée complète sans liste d'attente : aucune inscription acceptée.
-  const evAsk = L.soiree(L.clean(b.soiree, 120));
+  const evAsk = ['pass', 'soiree'].includes(L.clean(b.formule, 20)) ? L.soiree(L.clean(b.soiree, 120)) : null;
   // Réservations pas encore ouvertes pour cette soirée (champ « ouverture »).
   const aujourdhui = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
   if (evAsk && evAsk.ouverture && aujourdhui < evAsk.ouverture) return L.json(res, 409, { ok: false, error: 'pas_ouvert' });
@@ -39,13 +39,30 @@ module.exports = async (req, res) => {
     }
   }
 
-  // 1. La demande, pour La Caravane (répondre = écrire au client)
-  const interne = await L.sendMail({ to: L.env('RESERVATION_EMAIL'), subject, text: message, replyTo: email });
-  if (!interne.ok) return L.json(res, 502, { ok: false });
+  const ev = evAsk;
+  const f = fAsk, attente = !!b.attente, n = L.clean(b.invites, 4), prenom = nom.split(' ')[0];
+  // Privatisation / Convivialité : impossible un jour de soirée de l'agenda (la salle est prise).
+  if ((f === 'exclu' || f === 'conviv') && L.SOIREES.some((s) => s.date === b.date)) return L.json(res, 409, { ok: false, error: 'date_agenda' });
+  if (f === 'exclu' && nAsk && nAsk < 20) return L.json(res, 400, { ok: false, error: 'petit_groupe' });
 
-  // 2. Accusé de réception au client (nécessite un domaine vérifié dans Resend)
-  const ev = L.soiree(L.clean(b.soiree, 120));
-  const f = L.clean(b.formule, 20), attente = !!b.attente, n = L.clean(b.invites, 4), prenom = nom.split(' ')[0];
+  // 1. Réservation de soirée : inscrite dans le Google Sheet EN PREMIER (avant tout e-mail), avec relances.
+  const resaSoiree = !!(ev && (attente || f === 'pass' || (f === 'soiree' && ev.surPlace)));
+  let dansSheet = true;
+  if (resaSoiree) {
+    const meta = { event_id: ev.id, event_date: ev.date, formule: attente ? 'attente' : f === 'soiree' ? 'surplace' : 'pass', places: n,
+      telephone: tel, occasion: L.clean(b.occasion, 80), plateaux: L.clean(b.plateaux, 400), precisions: L.clean(b.precisions, 450) };
+    let client = null;
+    try { client = await L.enregistrerResa(meta, { nom, email, telephone: tel }); } catch (e) { console.error('enregistrement resa', e.message); }
+    const ref = 'web_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    const j = await L.sheetPost(L.ligneResa({ name: nom, email, phone: tel, ref, ...(client || {}), metadata: { ...meta, ...((client && client.metadata) || {}) } }));
+    dansSheet = !L.env('SHEET_SECRET') || !!(j && j.ok);
+  }
+
+  // 2. La demande, pour La Caravane (répondre = écrire au client). Si le Sheet n'a pas répondu, l'objet le signale.
+  const interne = await L.sendMail({ to: L.env('RESERVATION_EMAIL'), subject: (dansSheet ? '' : '⚠️ À AJOUTER AU SHEET : ') + subject, text: message, replyTo: email });
+  if (!interne.ok && !resaSoiree) return L.json(res, 502, { ok: false });
+
+  // 3. Accusé de réception au client (nécessite un domaine vérifié dans Resend)
   let titre, intro, fin, lignes = [];
   if (attente && ev) {
     titre = 'Vous êtes sur la liste d\'attente';
@@ -67,14 +84,6 @@ module.exports = async (req, res) => {
     lignes = [['Date souhaitée', b.date ? L.dateFr(L.clean(b.date, 10)) : 'à définir'], ['Personnes', n], ['Formule', f === 'conviv' ? 'Convivialité' : 'Privatisation']];
   }
   if (b.plateaux) lignes.push(['Plateaux', L.clean(b.plateaux, 400)]);
-  if (ev && (attente || f === 'pass' || (f === 'soiree' && ev.surPlace))) {
-    const meta = { event_id: ev.id, event_date: ev.date, formule: attente ? 'attente' : f === 'soiree' ? 'surplace' : 'pass', places: n,
-      telephone: tel, occasion: L.clean(b.occasion, 80), plateaux: L.clean(b.plateaux, 400), precisions: L.clean(b.precisions, 450) };
-    let client = null;
-    try { client = await L.enregistrerResa(meta, { nom, email, telephone: tel }); } catch (e) { console.error('enregistrement resa', e.message); }
-    // Suivi dans le Google Sheet (réf = client Stripe, pour dédoublonner et pour les annulations)
-    await L.sheetPost(L.ligneResa({ name: nom, email, phone: tel, ...(client || {}), metadata: { ...meta, ...((client && client.metadata) || {}) } }));
-  }
   await L.sendMail({ to: email, subject: titre + ' : La Caravane', replyTo: L.env('RESERVATION_EMAIL'), html: L.mailHtml({ titre, intro, lignes, fin, bloc: ev && !attente && (f === 'pass' || (f === 'soiree' && ev.surPlace)) ? L.INFOS_SECURITE : '' }) });
 
   return L.json(res, 200, { ok: true });

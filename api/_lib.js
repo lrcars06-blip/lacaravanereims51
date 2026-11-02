@@ -9,6 +9,8 @@ const euro = (n) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency
 const dateFr = (d) => new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Paris' });
 const esc = (t) => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const soiree = (id) => SOIREES.find((s) => s.id === id);
+/* Places réservables en ligne : capacité (160 max) moins les réservations prises hors site ; la capacité entière si la soirée est complète. */
+const capEnLigne = (s) => { const cap = Math.min((s && s.places) || 160, 160), hors = (s && s.reservees) || 0; return s && s.complet && hors >= cap ? cap : Math.max(0, cap - hors); };
 const ACOMPTES = require('./_acomptes');
 /* Lien privé d'acompte valide pour cette soirée ? (clients ayant réservé par téléphone) */
 const lienAcompte = (id, cle) => { const a = ACOMPTES[id]; return a && cle && String(cle) === a.cle ? a : null; };
@@ -125,16 +127,22 @@ const sheetOn = () => !!env('SHEET_SECRET');
 const sheetSecret = () => { const v = env('SHEET_SECRET'); const m = v.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i); return m ? m[0].toLowerCase() : v.trim(); };
 async function sheetPost(payload) {
   if (!sheetOn()) return null;
-  try {
-    const r = await fetch(SHEET_URL(), {
-      method: 'POST', redirect: 'follow', signal: AbortSignal.timeout(15000),
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ ...payload, secret: sheetSecret() }),
-    });
-    const j = await r.json();
-    if (!j.ok) console.error('Sheet', j.error);
-    return j;
-  } catch (e) { console.error('Sheet', e.message); return null; }
+  // 3 essais : le Sheet peut être occupé quelques secondes quand beaucoup de monde réserve en même temps.
+  // Pas de doublon possible : chaque ligne porte une référence unique, ignorée si elle existe déjà.
+  for (let essai = 1; essai <= 3; essai++) {
+    try {
+      const r = await fetch(SHEET_URL(), {
+        method: 'POST', redirect: 'follow', signal: AbortSignal.timeout(20000),
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ ...payload, secret: sheetSecret() }),
+      });
+      const j = await r.json();
+      if (j.ok || j.error === 'interdit') { if (!j.ok) console.error('Sheet', j.error); return j; }
+      console.error('Sheet essai', essai, j.error);
+    } catch (e) { console.error('Sheet essai', essai, e.message); }
+    if (essai < 3) await new Promise((ok) => setTimeout(ok, 1500 * essai));
+  }
+  return null;
 }
 /* Personnes confirmées par soirée d'après le Sheet : { id: nombre }, ou null si le Sheet est inactif ou injoignable. */
 async function sheetCounts() {
@@ -159,15 +167,15 @@ async function sheetAnnules() {
 function ligneAcompte(pi) {
   const m = pi.metadata || {}, ev = soiree(m.event_id) || { titre: m.event_id, prix: 0, places: 160 };
   const pers = parseInt(m.places, 10) || 0, paye = (pi.amount_received || pi.amount || 0) / 100;
-  return { event: m.event_id, titre: ev.titre, capacite: ev.places, nom: m.nom, email: m.email, tel: m.telephone, personnes: pers,
+  return { event: m.event_id, titre: ev.titre, capacite: capEnLigne(ev), nom: m.nom, email: m.email, tel: m.telephone, personnes: pers,
     statut: 'confirmé', paiement: `Acompte ${euro(paye)} · solde ${euro(soldeRestant(ev, m, paye))}${m.enfants ? ` (dont ${m.enfants} enfant${m.enfants > 1 ? 's' : ''})` : ''}`, ref: pi.id,
     date: pi.created ? new Date(pi.created * 1000).toISOString() : undefined };
 }
 function ligneResa(c) {
   const m = c.metadata || {}, ev = soiree(m.event_id) || { titre: m.event_id, prix: 0, places: 160 };
   const pers = parseInt(m.places, 10) || 0, attente = m.formule === 'attente';
-  return { event: m.event_id, titre: ev.titre, capacite: ev.places, nom: c.name, email: c.email, tel: m.telephone || c.phone, personnes: pers,
-    statut: attente ? 'attente' : 'confirmé', paiement: attente ? 'Liste d\'attente' : m.formule === 'surplace' ? `Repas réglé sur place (${euro(pers * ev.prix)})` : `Pass sur place (${euro(pers * ev.prix)})`, ref: c.id,
+  return { event: m.event_id, titre: ev.titre, capacite: capEnLigne(ev), nom: c.name, email: c.email, tel: m.telephone || c.phone, personnes: pers,
+    statut: attente ? 'attente' : 'confirmé', paiement: attente ? 'Liste d\'attente' : m.formule === 'surplace' ? `Repas réglé sur place (${euro(pers * ev.prix)})` : `Pass sur place (${euro(pers * ev.prix)})`, ref: c.id || c.ref,
     date: c.created ? new Date(c.created * 1000).toISOString() : undefined };
 }
 /* Rattrapage : renvoie au Sheet toutes les réservations Stripe des soirées à venir (sans doublon, le Sheet dédoublonne par réf). */
@@ -212,4 +220,4 @@ async function acomptesSoiree(eventId) {
   return out;
 }
 
-module.exports = { soldeEnLigne, soldeLibelle, soldeRestant, INFOS_SECURITE, sheetListe, lienAcompte, totalResa, sheetPost, sheetCounts, sheetAnnules, ligneAcompte, ligneResa, syncSheet, enregistrerResa, resasSoiree, acomptesSoiree, env, clean, isEmail, euro, dateFr, esc, soiree, siteUrl, readJson, readRaw, stripe, placesVendues, verifStripe, sendMail, mailHtml, json, SOIREES, DEPOSIT };
+module.exports = { capEnLigne, soldeEnLigne, soldeLibelle, soldeRestant, INFOS_SECURITE, sheetListe, lienAcompte, totalResa, sheetPost, sheetCounts, sheetAnnules, ligneAcompte, ligneResa, syncSheet, enregistrerResa, resasSoiree, acomptesSoiree, env, clean, isEmail, euro, dateFr, esc, soiree, siteUrl, readJson, readRaw, stripe, placesVendues, verifStripe, sendMail, mailHtml, json, SOIREES, DEPOSIT };
