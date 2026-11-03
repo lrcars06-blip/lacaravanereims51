@@ -108,6 +108,17 @@ module.exports = { DEPOSIT: 0.3, SOIREES: [
     "ouverture": "2026-11-03"
   },
   {
+    "id": "black-white-2026-12-05",
+    "type": "pass",
+    "titre": "Soirée Black & White",
+    "date": "2026-12-05",
+    "heure": "de 19h30 à 2h",
+    "prix": 10,
+    "places": 160,
+    "reservees": 0,
+    "complet": false
+  },
+  {
     "id": "reveillon-2026-12-31",
     "type": "repas",
     "titre": "Réveillon du jour de l'an",
