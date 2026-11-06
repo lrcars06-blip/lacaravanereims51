@@ -97,6 +97,7 @@ function majSoirees() {
   if (!ScriptApp.getProjectTriggers().some((t) => t.getHandlerFunction() === 'majSoirees')) {
     ScriptApp.newTrigger('majSoirees').timeBased().everyDays(1).atHour(6).create();
   }
+  try { trierEtColorer(); } catch (e) { Logger.log('Tri : ' + e.message); }
   Logger.log((apres - avant) + ' soirée(s) ajoutée(s)');
   return apres - avant;
 }
@@ -255,4 +256,52 @@ function miseEnForme() {
   if (lignes.length && !v.getRange('B4').getValue()) v.getRange('B4').setValue(lignes[0][5]);
   ss.setActiveSheet(v); ss.moveActiveSheet(1);
   Logger.log('Mise en forme OK');
+}
+
+// ============================================================================
+// Tri et couleurs : réservations rangées par soirée (dans l'ordre des dates), une couleur par soirée.
+// Tourne chaque matin (après majSoirees) et à la demande : menu « La Caravane » > « Trier et colorer ».
+// ============================================================================
+const COULEURS = ['#FDE2E4', '#DCE8FC', '#DDF3DA', '#FFEFC2', '#EADFFB', '#FFE2C7', '#D3F0F0', '#F9DDEE', '#E6ECC4', '#DEDEF7', '#F3E6D6', '#D8EEE2'];
+function onOpen() {
+  SpreadsheetApp.getUi().createMenu('La Caravane').addItem('Trier et colorer les réservations', 'trierEtColorer').addToUi();
+}
+function dateSoiree(id) { const m = String(id).match(/(\d{4})-(\d{2})-(\d{2})$/); return m ? m[1] + m[2] + m[3] : '99999999'; }
+function trierEtColorer() {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    const ss = SpreadsheetApp.getActive(), r = feuille(), s = ss.getSheetByName('Soirees');
+    const auj = Utilities.formatDate(new Date(), 'Europe/Paris', 'yyyyMMdd');
+
+    // 1. Onglet Soirees : titres clairs, soirées à venir en haut (par date), passées en bas
+    s.getRange('B1:D1').setValues([['Places en ligne', 'Personnes réservées', 'Places restantes']]);
+    const sv = s.getRange(2, 1, 199, 5).getValues().filter((x) => x[0]);
+    sv.sort((a, b) => {
+      const da = dateSoiree(a[0]), db = dateSoiree(b[0]), pa = da < auj, pb = db < auj;
+      return pa !== pb ? (pa ? 1 : -1) : pa ? db.localeCompare(da) : da.localeCompare(db);
+    });
+    s.getRange(2, 1, 199, 2).clearContent(); s.getRange(2, 5, 199, 1).clearContent(); // C, D, F, G sont des formules : on n'y touche pas
+    if (sv.length) { s.getRange(2, 1, sv.length, 2).setValues(sv.map((x) => [x[0], x[1]])); s.getRange(2, 5, sv.length, 1).setValues(sv.map((x) => [x[4]])); }
+
+    // 2. Onglet Reservations : trié par date de soirée, puis par heure de réservation
+    const last = r.getLastRow();
+    if (last > 2) {
+      const rg = r.getRange(2, 1, last - 1, 9), v = rg.getValues();
+      v.sort((a, b) => dateSoiree(a[1]).localeCompare(dateSoiree(b[1])) || String(a[1]).localeCompare(String(b[1])) || (new Date(a[0]) - new Date(b[0])));
+      r.getRange('E2:E').setNumberFormat('@');
+      rg.setValues(v.map((x) => { x[4] = x[4] === '' ? '' : String(x[4]); return x; }));
+    }
+
+    // 3. Une couleur par soirée (annulées en gris barré et liste d'attente en jaune restent prioritaires)
+    const ids = [...new Set(r.getRange(2, 2, Math.max(1, r.getLastRow() - 1), 1).getValues().flat().filter(String))].sort((a, b) => dateSoiree(a).localeCompare(dateSoiree(b)));
+    r.setConditionalFormatRules([
+      SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=$G2="annulé"').setFontColor('#9A93A8').setStrikethrough(true).setRanges([r.getRange('A2:I1000')]).build(),
+      SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=$G2="attente"').setBackground('#FFF1C9').setRanges([r.getRange('A2:I1000')]).build(),
+      SpreadsheetApp.newConditionalFormatRule().whenTextEqualTo('confirmé').setBackground('#DDF5CF').setFontColor('#24601A').setBold(true).setRanges([r.getRange('G2:G1000')]).build(),
+      ...ids.map((id, i) => SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=$B2="' + id + '"').setBackground(COULEURS[i % COULEURS.length]).setRanges([r.getRange('A2:F1000'), r.getRange('H2:I1000')]).build()),
+    ]);
+  } finally {
+    lock.releaseLock();
+  }
 }
