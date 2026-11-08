@@ -1223,11 +1223,11 @@ dialog.resa-box{width:min(100% - 16px,640px)}
       prix: 30, prixTexte: 'par personne : repas, concert et DJ, réglé sur place', places: 160, reservees: 75, complet: false, surPlace: true,
       affiche: 'affiche-johnny-blues.jpg', infos: ['Concert Rock\'n\'Roll', 'Repas', 'DJ après le concert'] },
     { id: 'celibataires-2026-12-04', type: 'pass', titre: 'Soirée célibataires', date: '2026-12-04', heure: 'de 19h30 à 2h', ouverture: '2026-11-03', report: '2026-11-06',
-      texte: 'Des bracelets de couleur pour briser la glace : rouge, à la recherche de l\'amour ; vert, pour l\'amitié ; jaune, ouvert(e) à la discussion ; bleu, juste là pour danser. DJ set jusqu\'à 2h, planches apéritives à 18 € pour 2. Les réservations se font sur liste d\'attente.',
+      texte: 'Des bracelets de couleur pour briser la glace : rouge, à la recherche de l\'amour ; vert, pour l\'amitié ; jaune, ouvert(e) à la discussion ; bleu, juste là pour danser. DJ set jusqu\'à 2h, planches apéritives à 18 € pour 2.',
       prix: 10, prixTexte: 'le pass, 1 consommation incluse', places: 160, reservees: 0, complet: true, listeAttente: true, table: true,
       affiche: 'affiche-celibataires-4-decembre.jpg', infos: ['DJ set', 'Bracelets de couleur', 'Planches 18 € (2 pers.)', 'Ouverte à tous'] },
     { id: 'celibataires-2026-12-05', type: 'pass', titre: 'Soirée célibataires, édition n° 2', date: '2026-12-05', heure: 'de 19h30 à 2h',
-      texte: 'Le vendredi 4 décembre a affiché complet en 48 heures : voici une deuxième soirée célibataires ! DJ Baloo aux platines, des années 80 à nos jours (disco, funk, rock, madison, slows, années 90, 2000 et hits actuels). Les bracelets de couleur sont de retour : rouge, à la recherche de l\'amour ; vert, pour l\'amitié ; jaune, ouvert(e) à la discussion ; bleu, juste là pour danser. On vient seul ou entre amis, ouverte à tous. Planches apéritives à 18 € pour 2.',
+      texte: 'Face au succès du vendredi 4 décembre, voici une deuxième soirée célibataires ! DJ Baloo aux platines, des années 80 à nos jours (disco, funk, rock, madison, slows, années 90, 2000 et hits actuels). Les bracelets de couleur sont de retour : rouge, à la recherche de l\'amour ; vert, pour l\'amitié ; jaune, ouvert(e) à la discussion ; bleu, juste là pour danser. On vient seul ou entre amis, ouverte à tous. Planches apéritives à 18 € pour 2.',
       prix: 10, prixTexte: 'le pass, 1 consommation incluse', places: 160, reservees: 0, complet: true, listeAttente: true, table: true,
       affiche: 'affiche-celibataires-5-decembre.jpg', infos: ['Édition n° 2', 'DJ Baloo', 'Bracelets de couleur', 'Planches 18 € (2 pers.)'] },
     { id: 'blanche-2026-12-11', type: 'pass', titre: 'Soirée Blanche', date: '2026-12-11', heure: 'de 19h30 à 2h',
@@ -1585,8 +1585,10 @@ dialog.resa-box{width:min(100% - 16px,640px)}
   function evWait(e) { return evFull(e) && e.attente !== false; }
   /* listeAttente : inscriptions fermées, réservation sur liste d'attente, sans afficher « complet » */
   function evLA(e) { return !!e.listeAttente; }
+  /* Ce que voit le visiteur sur l'accueil : une soirée en liste d'attente s'affiche comme une soirée ouverte (l'info n'apparaît qu'au moment de réserver) */
+  function vFull(e) { return evFull(e) && !evLA(e); }
   function evDate(e) { var d = new Date(e.date + 'T12:00:00'); return { d: d, j: d.getDate(), m: MOIS[d.getMonth()], a: d.getFullYear(), jour: JOURS[d.getDay()], long: d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }), court: d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) }; }
-  function evColor(e) { return evFull(e) ? 'rgba(250,235,211,.35)' : e.type === 'pass' ? 'var(--bulb)' : 'var(--coral)'; }
+  function evColor(e) { return vFull(e) ? 'rgba(250,235,211,.35)' : e.type === 'pass' ? 'var(--bulb)' : 'var(--coral)'; }
   function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
   var todayD = new Date(); todayD.setHours(0, 0, 0, 0);
   var UPCOMING = EVENTS.filter(function (e) { return new Date(e.date + 'T23:59:59') >= todayD; }).sort(function (a, b) { return a.date < b.date ? -1 : 1; });
@@ -1597,7 +1599,7 @@ dialog.resa-box{width:min(100% - 16px,640px)}
   function renderEvents() {
     if (!UPCOMING.length) { $('#events').innerHTML = '<p class="events-note" style="margin:0">Aucune soirée n\'est programmée pour le moment. Les prochaines dates arrivent bientôt.</p>'; return; }
     $('#events').innerHTML = UPCOMING.map(function (e) {
-      var d = evDate(e), full = evFull(e), left = evLeft(e), book;
+      var d = evDate(e), full = vFull(e), left = evLeft(e), book;
       if (evAVenir(e)) {
         book = '<span class="total"><b>' + evOuvTxt(e) + '</b>, sur ce site.</span>';
       } else if (full) {
@@ -1605,6 +1607,8 @@ dialog.resa-box{width:min(100% - 16px,640px)}
       } else if (e.type === 'pass') {
         book = e.gratuit ? '<span class="total">Entrée gratuite, consommations réglées sur place</span><a class="btn btn-main" href="#reserver" data-book="' + e.id + '" data-kind="pass">Réserver ma table</a>'
           : '<span class="total">Pass réglé sur place, le soir même</span><a class="btn btn-main" href="#reserver" data-book="' + e.id + '" data-kind="pass">Réserver mon pass' + (e.table ? ' ou ma table' : '') + '</a>';
+      } else if (evLA(e)) {
+        book = '<span class="total">' + euro(e.prix) + ' par personne' + (e.surPlace ? ', réglé sur place le soir même' : '') + '</span><a class="btn btn-main" href="#reserver" data-book="' + e.id + '" data-kind="soiree">Réserver</a>';
       } else {
         var n = qty[e.id] || Math.min(2, left);
         book = '<div class="stepper" role="group" aria-label="Nombre de places"><button type="button" data-ev="' + e.id + '" data-d="-1" aria-label="Une place de moins">−</button><output>' + n + '</output><button type="button" data-ev="' + e.id + '" data-d="1" aria-label="Une place de plus">+</button></div>' +
@@ -1644,7 +1648,7 @@ dialog.resa-box{width:min(100% - 16px,640px)}
     for (var dd = 1; dd <= days; dd++) {
       var date = new Date(y, m, dd), key = ymd(date), ev = UPCOMING.filter(function (x) { return x.date === key; })[0];
       var cls = (date < todayD ? 'past' : '') + (+date === +todayD ? ' today' : '') + (!ev && date >= todayD && samediPrive(key) ? ' prive' : '') + (!ev && date >= todayD && fermePublic(key) ? ' ferme' : '');
-      html += ev ? '<button type="button" class="' + cls + '" style="--c:' + evColor(ev) + '" data-cal="' + ev.id + '" aria-pressed="' + (ev.id === activeId) + '" aria-label="' + dd + ' ' + MOIS_LONG[m] + ' : ' + esc(ev.titre) + (evLA(ev) ? ', liste d\'attente' : evFull(ev) ? ', complet' : '') + '">' + dd + '</button>'
+      html += ev ? '<button type="button" class="' + cls + '" style="--c:' + evColor(ev) + '" data-cal="' + ev.id + '" aria-pressed="' + (ev.id === activeId) + '" aria-label="' + dd + ' ' + MOIS_LONG[m] + ' : ' + esc(ev.titre) + (vFull(ev) ? ', complet' : '') + '">' + dd + '</button>'
                  : '<span class="' + cls + '"' + (/prive/.test(cls) ? ' title="Privatisé"' : FERMETURES.indexOf(key) >= 0 ? ' title="Fermeture exceptionnelle au public"' : /ferme/.test(cls) ? ' title="Fermé au public, privatisation uniquement"' : '') + '>' + dd + '</span>';
     }
     $('#calGrid').innerHTML = html;
@@ -1678,19 +1682,19 @@ dialog.resa-box{width:min(100% - 16px,640px)}
     cur = i; var e = UPCOMING[i], d = evDate(e);
     $$('#showDots button').forEach(function (b, k) { b.setAttribute('aria-selected', k === i); });
     $('#showInfo').innerHTML = '<p class="when">' + d.court + ', ' + e.heure + '</p><h3>' + esc(e.titre) + '</h3><p>' + esc(e.texte) + '</p>' + tags(e) +
-      '<p><b style="color:var(--bulb)">' + prixLabel(e) + '</b>' + (e.gratuit ? '' : ' ' + esc(e.prixTexte)) + (evLA(e) ? '. <b style="color:var(--coral)">Réservation sur liste d\'attente.</b>' : evWait(e) ? '. <b style="color:var(--coral)">Complet, liste d\'attente ouverte.</b>' : evFull(e) ? '. <b style="color:var(--coral)">Complet.</b>' : '.') + '</p>' +
+      '<p><b style="color:var(--bulb)">' + prixLabel(e) + '</b>' + (e.gratuit ? '' : ' ' + esc(e.prixTexte)) + (evLA(e) ? '' : evWait(e) ? '. <b style="color:var(--coral)">Complet, liste d\'attente ouverte.</b>' : evFull(e) ? '. <b style="color:var(--coral)">Complet.</b>' : '.') + '</p>' +
       '<div class="row"><button type="button" class="btn btn-main" data-go="' + e.id + '">Voir dans le calendrier</button>' +
-      (evFull(e) || evAVenir(e) ? (evAVenir(e) ? '<p style="margin:0;align-self:center"><b style="color:var(--bulb)">' + evOuvTxt(e) + '.</b></p>' : '') : '<a class="btn btn-ghost" href="#reserver" data-book="' + e.id + '" data-kind="' + (e.type === 'pass' ? 'pass' : 'soiree') + '">' + (e.type === 'pass' ? (e.gratuit ? 'Réserver ma table' : 'Réserver mon pass') : 'Réserver') + '</a>') + '</div>';
+      (vFull(e) || evAVenir(e) ? (evAVenir(e) ? '<p style="margin:0;align-self:center"><b style="color:var(--bulb)">' + evOuvTxt(e) + '.</b></p>' : '') : '<a class="btn btn-ghost" href="#reserver" data-book="' + e.id + '" data-kind="' + (e.type === 'pass' ? 'pass' : 'soiree') + '">' + (e.type === 'pass' ? (e.gratuit ? 'Réserver ma table' : 'Réserver mon pass') : 'Réserver') + '</a>') + '</div>';
   }
   function goSlide(i) { i = (i + UPCOMING.length) % UPCOMING.length; track.scrollTo({ left: i * track.clientWidth, behavior: calm ? 'auto' : 'smooth' }); showInfo(i); }
   if (!UPCOMING.length) {
     $('.show-wrap').innerHTML = '<figure class="hero-photo"><img src="caravane-lustres.jpg" alt="La salle de La Caravane : la caravane illuminée, les lustres et les tables dressées"></figure>';
   } else {
     track.innerHTML = UPCOMING.map(function (e, i) {
-      var tag = evAVenir(e) ? 'Réservations le ' + new Date(e.ouverture + 'T12:00:00').getDate() + ' ' + MOIS[new Date(e.ouverture + 'T12:00:00').getMonth()] : evLA(e) ? 'Liste d\'attente' : evFull(e) ? 'Complet' : e.gratuit ? 'Entrée gratuite' : e.type === 'pass' ? 'Pass ' + euro(e.prix) : 'Soirée repas';
+      var tag = evAVenir(e) ? 'Réservations le ' + new Date(e.ouverture + 'T12:00:00').getDate() + ' ' + MOIS[new Date(e.ouverture + 'T12:00:00').getMonth()] : vFull(e) ? 'Complet' : e.gratuit ? 'Entrée gratuite' : e.type === 'pass' ? 'Pass ' + euro(e.prix) : 'Soirée repas';
       return '<button class="slide" type="button" data-go="' + e.id + '" aria-label="' + esc(e.titre) + ', ' + evDate(e).court + '. Voir dans le calendrier">' +
         '<span class="slide-bg" style="background-image:url(\'' + e.affiche + '\')"></span><img src="' + e.affiche + '" alt="Affiche : ' + esc(e.titre) + '"' + (i ? ' loading="lazy"' : ' fetchpriority="high"') + '>' +
-        '<span class="slide-tag" style="--c:' + (evFull(e) ? 'var(--coral)' : e.type === 'pass' ? 'var(--bulb)' : 'var(--lagoon)') + '">' + tag + '</span></button>';
+        '<span class="slide-tag" style="--c:' + (vFull(e) ? 'var(--coral)' : e.type === 'pass' ? 'var(--bulb)' : 'var(--lagoon)') + '">' + tag + '</span></button>';
     }).join('');
     $('#showDots').innerHTML = UPCOMING.map(function (e, i) { return '<button type="button" role="tab" aria-label="' + esc(e.titre) + '" data-i="' + i + '"></button>'; }).join('');
     $('#showPrev').addEventListener('click', function () { goSlide(cur - 1); });
@@ -1922,7 +1926,7 @@ dialog.resa-box{width:min(100% - 16px,640px)}
     if (!rEv) {
       var list = UPCOMING.filter(function (e) { return !(evFull(e) && !evWait(e)); });
       $('#resaList').innerHTML = list.length ? list.map(function (e) {
-        var avenir = evAVenir(e), tag = avenir ? '<span class="tag">' + evOuvTxt(e) + '</span>' : evLA(e) ? '<span class="tag">Liste d\'attente</span>' : rWait(e) ? '<span class="tag">Complet, liste d\'attente</span>' : '<span class="tag ok">Places disponibles</span>';
+        var avenir = evAVenir(e), tag = avenir ? '<span class="tag">' + evOuvTxt(e) + '</span>' : evLA(e) ? '' : rWait(e) ? '<span class="tag">Complet, liste d\'attente</span>' : '<span class="tag ok">Places disponibles</span>';
         return '<button type="button" class="resa-pick" data-rpick="' + e.id + '"' + (avenir ? ' disabled' : '') + '><span class="d">' + cap1(evDate(e).court) + '</span><b>' + esc(e.titre) + '</b><span class="p">' + (e.gratuit ? 'Entrée gratuite' : e.type === 'pass' ? 'Pass ' + euro(e.prix) + ', réglé sur place' : euro(e.prix) + ' par personne') + '</span>' + tag + '</button>';
       }).join('') : '<p>Aucune soirée ouverte à la réservation pour le moment.</p>';
       return;
