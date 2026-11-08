@@ -25,53 +25,54 @@ ${rows}
 }
 
 async function compteRendu(ev) {
-  const annules = await L.sheetAnnules();
   const lignes = [['Date', `${L.dateFr(ev.date)}${ev.heure ? ', ' + ev.heure : ''}`]];
-  let bloc = '', subject, nbPers = 0;
   const ordre = (a, b) => a.t - b.t; // ordre d'arrivée des réservations
+  let bloc = '', nbPers = 0;
 
-  if (ev.type === 'repas' && !ev.surPlace) {
-    let acomptes = 0, soldes = 0;
-    const resas = (await L.acomptesSoiree(ev.id)).filter((pi) => !annules.has(pi.id)).map((pi) => {
-      const m = pi.metadata || {}, pers = parseInt(m.places, 10) || 0, paye = pi.amount_received / 100, solde = L.soldeRestant(ev, m, paye);
-      acomptes += paye; soldes += solde;
-      return { t: pi.created || 0, nom: m.nom, email: m.email, tel: m.telephone, pers,
-        obs: [m.solde_paye ? `Acompte ${L.euro(paye)}, solde payé en ligne` : `Acompte ${L.euro(paye)}, solde ${L.euro(solde)}`, m.enfants ? `dont ${m.enfants} enfant(s)` : '', m.occasion, m.plateaux, m.precisions].filter(Boolean).join(' · ') };
-    }).sort(ordre);
-    nbPers = resas.reduce((t, r) => t + r.pers, 0);
-    lignes.push(['Couverts réservés en ligne', `${nbPers} / ${ev.places}`], ['Acomptes encaissés', L.euro(acomptes)], ['Soldes à encaisser', L.euro(soldes)]);
-    bloc = liste('Réservations payées en ligne', resas, true);
-  } else {
-    const all = (await L.resasSoiree(ev.id)).filter((c) => !annules.has(c.id)).map((c) => ({ t: c.created || 0, f: c.metadata.formule, nom: c.name, email: c.email, tel: c.metadata.telephone || c.phone,
-      pers: parseInt(c.metadata.places, 10) || 0, obs: [c.metadata.occasion, c.metadata.plateaux, c.metadata.precisions].filter(Boolean).join(' · ') })).sort(ordre);
-    const pass = all.filter((r) => r.f === 'pass' || r.f === 'surplace'), attente = all.filter((r) => r.f === 'attente');
-    nbPers = pass.reduce((t, r) => t + r.pers, 0);
-    lignes.push([ev.surPlace ? 'Places réservées en ligne' : 'Pass réservés en ligne', String(nbPers)], ['À encaisser sur place', L.euro(nbPers * ev.prix)]);
-    if (ev.reservees && !(ev.complet && ev.reservees >= (ev.places || 160))) lignes.push(['Réservations prises hors site (téléphone, réseaux)', `${ev.reservees} personnes, à pointer sur votre liste`]);
-    bloc = liste('Réservations', pass, false);
-    if (attente.length) bloc += liste('Liste d\'attente', attente, false);
-  }
-  // Réservations saisies à la main dans le Sheet (téléphone, SMS) : sans référence Stripe.
-  const aLaMain = (await L.sheetListe(ev.id)).filter((r) => r.statut === 'confirmé' && !/^(pi|cus|cs)_/.test(r.ref))
-    .map((r) => ({ t: Date.parse(r.date) / 1000 || 0, nom: r.nom, email: r.email, tel: r.tel, pers: r.personnes, obs: [r.paiement, 'saisie dans le Sheet'].filter(Boolean).join(' · ') }));
-  if (aLaMain.length) {
-    const n = aLaMain.reduce((t, r) => t + r.pers, 0);
-    nbPers += n;
-    lignes.push(['Ajoutées dans le Sheet (téléphone)', `${aLaMain.length} réservation${aLaMain.length > 1 ? 's' : ''}, ${n} personne${n > 1 ? 's' : ''}`]);
-    bloc += liste('Réservations ajoutées dans le Sheet', aLaMain, false);
-  }
+  // Détails saisis par le client sur le site (occasion, planches, précisions), retrouvés par la référence Stripe.
+  const details = new Map();
+  try {
+    if (ev.type === 'repas' && !ev.surPlace) {
+      let acomptes = 0, soldes = 0;
+      const annules = await L.sheetAnnules();
+      for (const pi of await L.acomptesSoiree(ev.id)) {
+        const m = pi.metadata || {}, paye = pi.amount_received / 100;
+        if (!annules.has(pi.id)) { acomptes += paye; soldes += L.soldeRestant(ev, m, paye); }
+        details.set(pi.id, [m.enfants ? `dont ${m.enfants} enfant(s)` : '', m.occasion, m.plateaux, m.precisions].filter(Boolean).join(' · '));
+      }
+      lignes.push(['Acomptes encaissés', L.euro(acomptes)], ['Soldes à encaisser', L.euro(soldes)]);
+    } else {
+      for (const c of await L.resasSoiree(ev.id)) details.set(c.id, [c.metadata.occasion, c.metadata.plateaux, c.metadata.precisions].filter(Boolean).join(' · '));
+    }
+  } catch (e) { console.error('détails Stripe', e.message); }
+
+  // LA source de vérité : le Google Sheet (statuts modifiés par Vincent, réservations déplacées, saisies par téléphone).
+  const j = await L.sheetPost({ action: 'liste', event: ev.id });
+  if (!j || !j.ok) lignes.push(['⚠️ Attention', 'Google Sheet injoignable au moment de l\'envoi : ouvrez le Sheet pour la liste à jour.']);
+  const rows = ((j && j.lignes) || []).map((r) => ({ t: Date.parse(r.date) / 1000 || 0, statut: r.statut, nom: r.nom, email: r.email, tel: r.tel, pers: r.personnes,
+    obs: [r.paiement, details.get(r.ref)].filter(Boolean).join(' · ') }));
+  const conf = rows.filter((r) => r.statut === 'confirmé').sort(ordre), attente = rows.filter((r) => r.statut === 'attente').sort(ordre);
+  nbPers = conf.reduce((t, r) => t + r.pers, 0);
+  const nbAtt = attente.reduce((t, r) => t + r.pers, 0);
+  lignes.push(['Réservations confirmées (Sheet)', `${conf.length} réservation${conf.length > 1 ? 's' : ''}, ${nbPers} personne${nbPers > 1 ? 's' : ''}`]);
+  if (!(ev.type === 'repas' && !ev.surPlace) && ev.prix) lignes.push(['À encaisser sur place', L.euro(nbPers * ev.prix)]);
+  if (attente.length) lignes.push(['Liste d\'attente (non confirmée)', `${attente.length} demande${attente.length > 1 ? 's' : ''}, ${nbAtt} personne${nbAtt > 1 ? 's' : ''}`]);
+  bloc = liste('Réservations confirmées', conf, false);
+  if (attente.length) bloc += liste('Liste d\'attente (à rappeler, non confirmée)', attente, false);
+
   // Réservations prises hors site (téléphone, réseaux), saisies dans la configuration de la soirée.
-  // Soirée complète : le chiffre de la salle inclut déjà tout le monde, on affiche la capacité.
+  // Soirée complète par la salle : le chiffre inclut déjà tout le monde, on affiche la capacité.
   const plein = ev.complet && (ev.reservees || 0) >= (ev.places || 160);
+  if (!plein && ev.reservees) lignes.push(['Réservations prises hors site (téléphone, SMS)', `${ev.reservees} personnes, à pointer sur votre liste`]);
   if (plein) lignes.push(['TOTAL attendu', `Complet : ${ev.places} personnes`]);
   else { nbPers += ev.reservees || 0; lignes.push(['TOTAL attendu', `${nbPers} personne${nbPers > 1 ? 's' : ''}`]); }
-  subject = plein ? `Demain : ${ev.titre}, complet (${ev.places} personnes)` : `Demain : ${ev.titre}, ${nbPers} personne${nbPers > 1 ? 's' : ''} réservée${nbPers > 1 ? 's' : ''}`;
+  const subject = plein ? `Demain : ${ev.titre}, complet (${ev.places} personnes)` : `Demain : ${ev.titre}, ${nbPers} personne${nbPers > 1 ? 's' : ''} réservée${nbPers > 1 ? 's' : ''}`;
 
   return L.sendMail({
     to: L.env('RESERVATION_EMAIL'),
     subject,
-    html: L.mailHtml({ titre: `Liste des réservations : ${ev.titre}`, intro: 'Voici toutes les réservations faites sur le site pour la soirée de demain. Imprimez ce mail pour le pointage à l\'arrivée.', lignes, bloc,
-      fin: 'Les réservations prises par téléphone figurent dans cette liste si elles ont été ajoutées dans le Google Sheet (statut « confirmé »).' }),
+    html: L.mailHtml({ titre: `Liste des réservations : ${ev.titre}`, intro: 'Voici la liste à jour du Google Sheet pour la soirée de demain. Imprimez ce mail pour le pointage à l\'arrivée.', lignes, bloc,
+      fin: 'Seules les lignes « confirmé » du Sheet comptent dans le total. La liste d\'attente est donnée pour information.' }),
   });
 }
 
