@@ -104,7 +104,7 @@ footer a{color:var(--cream)}
     addCal(q.get('soiree') || 'Soirée', q.get('date'));
   } else if (type === 'attente') {
     $('#t').textContent = 'Vous êtes sur la liste d\'attente';
-    $('#lead').innerHTML = 'Merci' + prenom + '. La soirée est complète pour le moment : nous vous recontactons dès qu\'une place se libère.';
+    $('#lead').innerHTML = 'Merci' + prenom + '. Votre demande est bien inscrite sur la liste d\'attente : nous vous appelons pour confirmer votre place.';
     $('#body').innerHTML = rows([['Soirée', q.get('soiree')], ['Date', dateFr(q.get('date'))], ['Personnes', q.get('n')]]);
   } else {
     $('#t').textContent = 'Demande bien reçue';

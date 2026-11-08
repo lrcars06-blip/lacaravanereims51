@@ -46,7 +46,7 @@ module.exports = { DEPOSIT: 0.3, SOIREES: [
     "places": 160,
     "reservees": 137,
     "complet": true,
-    "attente": false
+    "listeAttente": true
   },
   {
     "id": "nouba-2026-11-13",
@@ -57,7 +57,8 @@ module.exports = { DEPOSIT: 0.3, SOIREES: [
     "prix": 10,
     "places": 160,
     "reservees": 83,
-    "complet": false
+    "complet": true,
+    "listeAttente": true
   },
   {
     "id": "beaujolais-2026-11-19",
@@ -80,8 +81,9 @@ module.exports = { DEPOSIT: 0.3, SOIREES: [
     "prix": 30,
     "places": 160,
     "reservees": 153,
-    "complet": false,
-    "surPlace": true
+    "complet": true,
+    "surPlace": true,
+    "listeAttente": true
   },
   {
     "id": "johnny-blues-2026-11-27",
@@ -105,8 +107,8 @@ module.exports = { DEPOSIT: 0.3, SOIREES: [
     "places": 160,
     "reservees": 0,
     "complet": true,
-    "attente": false,
-    "ouverture": "2026-11-03"
+    "ouverture": "2026-11-03",
+    "listeAttente": true
   },
   {
     "id": "celibataires-2026-12-05",
@@ -117,7 +119,8 @@ module.exports = { DEPOSIT: 0.3, SOIREES: [
     "prix": 10,
     "places": 160,
     "reservees": 0,
-    "complet": false
+    "complet": true,
+    "listeAttente": true
   },
   {
     "id": "blanche-2026-12-11",

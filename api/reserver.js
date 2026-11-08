@@ -66,7 +66,7 @@ module.exports = async (req, res) => {
   let titre, intro, fin, lignes = [];
   if (attente && ev) {
     titre = 'Vous êtes sur la liste d\'attente';
-    intro = `Bonjour ${L.esc(prenom)}, la soirée est complète pour le moment. Nous vous recontactons dès qu'une place se libère.`;
+    intro = `Bonjour ${L.esc(prenom)}, votre demande est bien inscrite sur la liste d'attente. Nous vous appelons pour confirmer votre place.`;
     lignes = [['Soirée', ev.titre], ['Date', L.dateFr(ev.date)], ['Personnes', n]];
   } else if (f === 'soiree' && ev && ev.surPlace) {
     titre = 'Votre place est réservée';
