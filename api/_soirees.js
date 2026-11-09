@@ -127,7 +127,7 @@ module.exports = { DEPOSIT: 0.3, SOIREES: [
     "type": "pass",
     "titre": "Soirée Blanche",
     "date": "2026-12-11",
-    "heure": "de 19h30 à 2h",
+    "heure": "de 21h à 2h",
     "prix": 10,
     "places": 160,
     "reservees": 0,
