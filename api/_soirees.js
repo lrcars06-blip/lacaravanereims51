@@ -141,7 +141,7 @@ module.exports = { DEPOSIT: 0.3, SOIREES: [
     "heure": "de 20h à 2h",
     "prix": 10,
     "places": 160,
-    "reservees": 91,
+    "reservees": 94,
     "complet": false
   },
   {
@@ -152,7 +152,7 @@ module.exports = { DEPOSIT: 0.3, SOIREES: [
     "heure": "de 20h à 2h",
     "prix": 10,
     "places": 160,
-    "reservees": 45,
+    "reservees": 55,
     "complet": false
   },
   {
