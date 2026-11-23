@@ -134,6 +134,28 @@ module.exports = { DEPOSIT: 0.3, SOIREES: [
     "complet": false
   },
   {
+    "id": "noel-annees-80-2026-12-18",
+    "type": "pass",
+    "titre": "Soirée de Noël, spécial années 80, acte 4",
+    "date": "2026-12-18",
+    "heure": "de 20h à 2h",
+    "prix": 10,
+    "places": 160,
+    "reservees": 0,
+    "complet": false
+  },
+  {
+    "id": "rhythm-of-the-night-2026-12-19",
+    "type": "pass",
+    "titre": "Rhythm of the Night",
+    "date": "2026-12-19",
+    "heure": "de 20h à 2h",
+    "prix": 10,
+    "places": 160,
+    "reservees": 0,
+    "complet": false
+  },
+  {
     "id": "reveillon-2026-12-31",
     "type": "repas",
     "titre": "Réveillon du jour de l'an",
