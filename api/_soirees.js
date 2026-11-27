@@ -131,7 +131,8 @@ module.exports = { DEPOSIT: 0.3, SOIREES: [
     "prix": 10,
     "places": 160,
     "reservees": 0,
-    "complet": false
+    "complet": true,
+    "listeAttente": true
   },
   {
     "id": "noel-annees-80-2026-12-18",
